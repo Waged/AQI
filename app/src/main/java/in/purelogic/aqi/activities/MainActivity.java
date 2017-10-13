@@ -1,0 +1,517 @@
+package in.purelogic.aqi.activities;
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.support.design.widget.NavigationView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.github.mikephil.charting.charts.BarChart;
+import com.jjoe64.graphview.GraphView;
+import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
+import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
+import com.squareup.otto.Subscribe;
+import com.wang.avi.AVLoadingIndicatorView;
+import com.yalantis.phoenix.PullToRefreshView;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import es.dmoral.toasty.Toasty;
+import in.purelogic.aqi.R;
+import in.purelogic.aqi.services.ForecastServices;
+
+
+public class MainActivity extends BaseActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
+
+    final String url = "https://www.facebook.com/aqiindia/";
+    // Constants:
+    final int REQUEST_CODE = 123;
+    // Base URL
+    //final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/forecast";
+    // App ID to use OpenWeather data
+    //final String APP_ID = "e72ca729af228beabd5d20e3b7749713";
+    //e72ca729af228beabd5d20e3b7749713
+    // Time between location updates (5000 milliseconds or 5 seconds)
+    final long MIN_TIME = 0;
+    // Distance between location updates (1000m or 1km)
+    final float MIN_DISTANCE = 0;
+
+
+    public static boolean gps_enabled = false;
+    public static boolean network_enabled = false;
+
+    @BindView(R.id.drawer_layout)
+    FlowingDrawer mDrawer;
+    @BindView(R.id.btnLocations)
+    ImageButton btnLocation;
+    @BindView(R.id.btnNotification)
+    ImageButton btnNotify;
+    @BindView(R.id.btnWhatAqi)
+    ImageButton btnWhatAqi;
+    @BindView(R.id.btnBlog)
+    ImageButton btnBlog;
+    @BindView(R.id.btnWebsite)
+    ImageButton btnWebsite;
+    @BindView(R.id.btnAboutUs)
+    ImageButton btnAboutUs;
+    @BindView(R.id.tvDate)
+    TextView tvDate;
+    @BindView(R.id.tvPlace)
+    TextView tvPlace;
+    @BindView(R.id.tvClock)
+    TextView tvClock;
+    @BindView(R.id.tvAqi)
+    TextView tvAqi;
+    @BindView(R.id.tvAqiComment)
+    TextView tvAqiComment;
+    @BindView(R.id.tvLastRefresh)
+    TextView tvLastRefresh;
+    @BindView(R.id.pull_to_refresh)
+    PullToRefreshView mPullToRefreshView;
+    @BindView(R.id.btnFacebook)
+    ImageButton btnFacebook;
+    @BindView(R.id.tvCurrentLocation)
+    TextView tvCurrentLocation;
+    @BindView(R.id.myCardView)
+    CardView locationCard;
+    @BindView(R.id.avi)
+    AVLoadingIndicatorView avi;
+    @BindView(R.id.graph)
+    GraphView graphView ;
+    @BindView(R.id.bar_chart)
+    BarChart chart ;
+
+
+
+    Animation fade;
+    MediaPlayer mp;
+    // Location provider will be used in AQI
+    String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
+
+    // TODO: Declare a LocationManager and a LocationListener here:
+    LocationManager mLocationManager;
+    LocationListener mLocationListener;
+    double latitude, longitude;
+
+    public static Intent newFacebookIntent(PackageManager pm, String url) {
+        Uri uri = Uri.parse(url);
+        try {
+            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
+            if (applicationInfo.enabled) {
+                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
+                Log.d("facebookredirecting", "welldone");
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+            Log.d("facebookredirecting", "badme");
+        }
+        return new Intent(Intent.ACTION_VIEW, uri);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("onStart", "Called");
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (android.os.Build.VERSION.SDK_INT <= 22) {
+            Log.e("onResume", "Called");
+            LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            try {
+                boolean gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            } catch (Exception ex) {
+                Log.e("gps", ex.toString());
+            }
+
+            try {
+                boolean network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            } catch (Exception ex) {
+                Log.e("network", ex.toString());
+            }
+            if (!gps_enabled && !network_enabled) {
+
+                displayPromptForEnablingGPS(this);
+            }
+        } else {
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                    PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
+
+            } else {
+                displayPromptForEnablingGPS(this);
+            }
+        }
+        getWeatherForCurrentLocation();
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        bus.post(new ForecastServices.SearchForecastsRequest("query"));
+
+
+
+        //TODO:Typeface for Texts
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/moodyrock.ttf");
+        //   Typeface tf2 = Typeface.createFromAsset(getAssets(),"fonts/arizona.ttf");
+        //   Typeface tf3 = Typeface.createFromAsset(getAssets(),"fonts/grand_hotel.otf");
+        Typeface tfRobotoBlack = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Black.ttf");
+        Typeface tfRobotoBlackItalic = Typeface.createFromAsset(getAssets(), "fonts/Roboto-BlackItalic.ttf");
+        Typeface tfRobotoBold = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Bold.ttf");
+        Typeface tfRobotoBoldCondensed = Typeface.createFromAsset(getAssets(), "fonts/Roboto-BoldCondensed.ttf");
+        //   Typeface tfRobotoBoldItalic = Typeface.createFromAsset(getAssets(),"fonts/Roboto-BoldItalic.ttf");
+        fade = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade);
+        mp = MediaPlayer.create(getApplicationContext(), R.raw.btnclick);
+        tvPlace.setTypeface(tfRobotoBoldCondensed, Typeface.BOLD);
+        tvDate.setTypeface(tfRobotoBlack, Typeface.BOLD);
+        tvClock.setTypeface(tfRobotoBlack);
+        tvAqi.setTypeface(tfRobotoBoldCondensed);
+        tvAqiComment.setTypeface(tfRobotoBlackItalic);
+        tvLastRefresh.setTypeface(tfRobotoBlackItalic);
+        tvCurrentLocation.setTypeface(tfRobotoBold);
+        tvCurrentLocation.setTextSize(18);
+        tvCurrentLocation.setAnimation(fade);
+
+        Date date = Calendar.getInstance().getTime();
+        String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
+        String day = (String) DateFormat.format("dd", date); // 20
+        String monthString = (String) DateFormat.format("MMM", date); // Jun
+
+        tvDate.setText(dayOfTheWeek + ", " + monthString + " " + day);
+        locationCard.setCardBackgroundColor(Color.TRANSPARENT);
+        locationCard.setCardElevation(4.0f);
+
+
+        //Todo: Elastic Drawer to view Settings
+        mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
+        mDrawer.setOnDrawerStateChangeListener(new ElasticDrawer.OnDrawerStateChangeListener() {
+            @Override
+            public void onDrawerStateChange(int oldState, int newState) {
+                if (newState == ElasticDrawer.STATE_CLOSED) {
+                    Log.i("MainActivity", "Drawer STATE_CLOSED");
+                    //   Toast.makeText(MainActivity.this, "onDrawerStateChange ", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onDrawerSlide(float openRatio, int offsetPixels) {
+                // Log.i("MainActivity", "openRatio=" + openRatio + " ,offsetPixels=" + offsetPixels);
+                //  Toast.makeText(MainActivity.this, "onDrawerSlide ", Toast.LENGTH_SHORT).show();
+            }
+        });
+        //Todo: Pull to refresh view
+        mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mPullToRefreshView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPullToRefreshView.setRefreshing(false);
+                        Toast.makeText(MainActivity.this, "Refreshing..", Toast.LENGTH_SHORT).show();
+                        Date date = Calendar.getInstance().getTime();
+                        String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
+                        String day = (String) DateFormat.format("dd", date); // 20
+                        String monthString = (String) DateFormat.format("MMM", date); // Jun
+                        String hourString = (String) DateFormat.format("HH", date); // Jun
+                        String minuteString = (String) DateFormat.format("mm", date);
+                        tvLastRefresh.setText(hourString + ":" + minuteString + " " + dayOfTheWeek + ", " + monthString + " " + day);
+                    }
+                }, 900);
+            }
+        });
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawer.isActivated()) {
+            Toasty.info(MainActivity.this, "drawer is activated", Toast.LENGTH_SHORT, false).show();
+            mDrawer.closeMenu(true);
+        } else {
+            super.onBackPressed();
+            Toasty.error(MainActivity.this, "Closed", Toast.LENGTH_SHORT, false).show();
+        }
+    }
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@Nullable MenuItem item) {
+        return true;
+    }
+
+    @Subscribe
+    public void getForecastMessage(ForecastServices.SearchForecastsResponse response) {
+        Toast.makeText(application, response.modifiedQuery, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("OnPause", "Happened");
+    }
+
+    // TODO: Add getWeatherForCurrentLocation() here:
+    private void getWeatherForCurrentLocation() {
+        avi.show();
+        Log.e("getWeather", "Called");
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mLocationListener = new LocationListener() {
+
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.e("onLocationChanged", "called");
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                Log.e("onLocationChanged", "Latitude =" + latitude + "longitude =" + longitude);
+                if (latitude != 0.0 && longitude != 0.0) {
+                    new FindMe(MainActivity.this).execute();
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                Log.d("onProviderDisabled", "called");
+            }
+        };
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
+            return;
+        }
+
+        mLocationManager.requestLocationUpdates(LOCATION_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
+    }
+
+    //TODO: AsyncTask to fetch user location
+    public class FindMe extends AsyncTask<Void, Void, String> {
+        private Context appContext;
+
+        public FindMe(Context appContext) {
+            this.appContext = appContext;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            Log.e("doInBackground", "Called");
+            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
+            List<Address> addresses = null;
+
+            try {
+                addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                if (addresses != null && addresses.size() > 0) {
+                    Log.e("Adress", addresses.toString());
+                    Address address = addresses.get(0);
+                    String cityName = address.getAddressLine(0);
+                    StringBuilder strReturnedAddress = new StringBuilder("");
+
+                    for (int i = 0; i <= 2; i++) {
+                        strReturnedAddress.append(address.getAddressLine(i)).append(",");
+                    }
+                    String strAdd = strReturnedAddress.toString();
+                    String state = addresses.get(0).getAdminArea();
+                    String city = addresses.get(0).getLocality();
+                    String country = addresses.get(0).getCountryName();
+                    String knownName = addresses.get(0).getFeatureName();
+                    String full = address.getAddressLine(0);
+                    Log.e("cityName", city);
+                    // tvPlace.setText(cityName+" "+stateName);
+                    if (knownName != null) {
+                        String myPlaceNow = knownName + ", " + city + ", " + country;
+                        return myPlaceNow.trim();
+
+                    }
+                    Log.e("knownName", "is empty");
+                    return strAdd;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "Couldn't Locate";
+            }
+            return null;
+        }
+
+        protected void onPostExecute(String result) {
+            tvPlace.setText(result);
+            tvCurrentLocation.setText(result);
+            avi.hide();
+        }
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("clima", "OnRequestPermission:permission Granted");
+                getWeatherForCurrentLocation();
+            } else {
+                Log.d("clima", "OnRequestPermission:permission Failed");
+                //Toasty.error(this, "App needs Permision to fetch AQI", Toast.LENGTH_SHORT).show();
+                // tvCurrentLocation.setText("Enable Permission");
+                // tvPlace.setText("GPS Off");
+            }
+        }
+    }
+
+    public static void displayPromptForEnablingGPS(final Activity activity) {
+        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+        final String message = "Do you want open GPS setting?";
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            Log.e("gps", ex.toString());
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+            Log.e("network", ex.toString());
+        }
+        if (!gps_enabled && !network_enabled) {
+
+
+            builder.setMessage(message)
+                    .setPositiveButton("OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface d, int id) {
+                                    activity.startActivity(new Intent(action));
+                                    d.dismiss();
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface d, int id) {
+                                    d.cancel();
+                                }
+                            });
+            builder.create().show();
+        }
+    }
+
+    //ToDO: Managing Clicks
+    @OnClick(R.id.btnLocations)
+    void locationButton(View view) {
+        mp.start();
+        //btnLocation.startAnimation(fade);
+        Intent map = new Intent(MainActivity.this, MapsActivity.class);
+        startActivity(map);
+       // mDrawer.closeMenu();
+    }
+
+    @OnClick(R.id.btnNotification)
+    void notificationbtn() {
+        Toast.makeText(application, "btnNotification", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.btnWhatAqi)
+    void whatsAQIbtn() {
+        Toast.makeText(application, "What's AQI ?", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.btnBlog)
+    void blogBtn() {
+       // btnBlog.setAnimation(fade);
+        Toasty.info(MainActivity.this, "Blog Redirecting .. ", Toast.LENGTH_SHORT, false).show();
+        Intent blog = new Intent(MainActivity.this, Blog.class);
+        startActivity(blog);
+        mp.start();
+       // mDrawer.closeMenu();
+    }
+
+    @OnClick(R.id.btnWebsite)
+    void ourWebBtn() {
+        btnWebsite.setAnimation(fade);
+        mp.start();
+        Toasty.info(MainActivity.this, "Webpage Redirecting .. ", Toast.LENGTH_SHORT, false).show();
+        mp.start();
+        //btnWebsite.setAnimation(fade);
+        String url = "http://aqi.in/";
+        Intent web = new Intent(Intent.ACTION_VIEW);
+       // mDrawer.closeMenu();
+        web.setData(Uri.parse(url));
+        startActivity(web);
+        
+
+    }
+
+    @OnClick(R.id.btnAboutUs)
+    void aboutUsBtn() {
+        mp.start();
+        //btnAboutUs.startAnimation(fade);
+        Intent aboutUs = new Intent(MainActivity.this, AboutUs.class);
+      //  mDrawer.closeMenu();
+        startActivity(aboutUs);
+    }
+
+    @OnClick(R.id.btnFacebook)
+    void facebookBtn() {
+        mp.start();
+        //btnFacebook.setAnimation(fade);
+       // mDrawer.closeMenu();
+        Toasty.info(MainActivity.this, "Facebook Redirecting", Toast.LENGTH_SHORT).show();
+        startActivity(newFacebookIntent(getPackageManager(), url));
+    }
+
+
+}
+

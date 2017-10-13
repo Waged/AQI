@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFEFF"
+    android:layout_height="match_parent"
+    android:paddingTop="30dp"
+    tools:context="in.purelogic.aqi.activities.AboutUs">
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/about_us_title"
+            android:text="@string/about_us"
+            android:textSize="30dp"
+            android:gravity="center"/>
+
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:foregroundGravity="center"
+        android:id="@+id/gifImageCondition"
+        android:layout_gravity="center"
+        android:layout_weight="0.26"
+        android:scaleType="centerCrop"
+        android:src="@drawable/team" />
+    <TextView
+        android:id="@+id/about_us_sub_title1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:gravity="center"
+        android:text="@string/about_us_txt1" />
+
+
+
+
+
+
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/creativeteam" />
+
+        <TextView
+            android:id="@+id/about_us_sub_title2"
+            android:paddingTop="10dp"
+            android:padding="8dp"
+            android:textSize="27sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/about_us_txt2"/>
+
+        <TextView
+            android:id="@+id/about_us_sub_title3"
+            android:paddingTop="20dp"
+            android:padding="8dp"
+            android:textSize="28sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Follow us"/>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/btnFacebook"
+                android:layout_marginEnd="10dp"
+                android:background="@null"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/facebookicon"
+                android:layout_marginRight="10dp" />
+            <ImageButton
+                android:layout_marginRight="10dp"
+                android:background="@null"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/instgramicon"/>
+            <ImageButton
+                android:background="@null"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/twittericon"
+                android:layout_marginBottom="20dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</ScrollView>
+
+
+</LinearLayout>
