@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -22,7 +23,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.R;
 
-public class Blog extends BaseActivity {
+public class Blog extends AppCompatActivity {
 
     String wordPress;
     AVLoadingIndicatorView avi;

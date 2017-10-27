@@ -12,8 +12,8 @@
 
     <color name="colorTextPrimaryModerate">#9ba821</color>
     <color name="colorTextSecondaryModerate">#a6a8a7</color>
-
-
+    <color name="cyan_color">#01f3f3</color>
+    <color name="dsb_progress_color">#FF4081</color>
     <color name="colorTextPrimaryBad">#a83121</color>
     <color name="colorTextSecondaryBad">#a8a6a6</color>
     <color name="colorTextBlack">#24292e</color>

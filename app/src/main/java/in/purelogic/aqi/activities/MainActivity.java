@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -35,11 +36,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.github.mikephil.charting.charts.BarChart;
 import com.jjoe64.graphview.GraphView;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
-import com.squareup.otto.Subscribe;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.yalantis.phoenix.PullToRefreshView;
 import java.io.IOException;
@@ -52,10 +51,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.R;
-import in.purelogic.aqi.services.ForecastServices;
 
-
-public class MainActivity extends BaseActivity
+public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     final String url = "https://www.facebook.com/aqiindia/";
@@ -113,8 +110,7 @@ public class MainActivity extends BaseActivity
     AVLoadingIndicatorView avi;
     @BindView(R.id.graph)
     GraphView graphView ;
-    @BindView(R.id.bar_chart)
-    BarChart chart ;
+
 
 
 
@@ -191,7 +187,7 @@ public class MainActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        bus.post(new ForecastServices.SearchForecastsRequest("query"));
+       // bus.post(new ForecastServices.SearchForecastsRequest("query"));
 
 
 
@@ -257,7 +253,7 @@ public class MainActivity extends BaseActivity
                         String monthString = (String) DateFormat.format("MMM", date); // Jun
                         String hourString = (String) DateFormat.format("HH", date); // Jun
                         String minuteString = (String) DateFormat.format("mm", date);
-                        tvLastRefresh.setText(hourString + ":" + minuteString + " " + dayOfTheWeek + ", " + monthString + " " + day);
+                        tvLastRefresh.setText(hourString + ":" + minuteString + " " + dayOfTheWeek + ", " + monthString + " " + day); // we are
                     }
                 }, 900);
             }
@@ -283,10 +279,7 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    @Subscribe
-    public void getForecastMessage(ForecastServices.SearchForecastsResponse response) {
-        Toast.makeText(application, response.modifiedQuery, Toast.LENGTH_SHORT).show();
-    }
+
 
     @Override
     protected void onPause() {
@@ -460,12 +453,12 @@ public class MainActivity extends BaseActivity
 
     @OnClick(R.id.btnNotification)
     void notificationbtn() {
-        Toast.makeText(application, "btnNotification", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "btnNotification", Toast.LENGTH_SHORT).show();
     }
 
     @OnClick(R.id.btnWhatAqi)
     void whatsAQIbtn() {
-        Toast.makeText(application, "What's AQI ?", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
     }
 
     @OnClick(R.id.btnBlog)

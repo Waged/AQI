@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -13,7 +14,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import in.purelogic.aqi.R;
 
-public class AboutUs extends BaseActivity {
+public class AboutUs extends AppCompatActivity {
 
     @BindView(R.id.about_us_title)
     TextView tvAboutUsTitle;

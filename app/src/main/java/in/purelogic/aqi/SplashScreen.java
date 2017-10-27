@@ -24,7 +24,7 @@ public class SplashScreen extends AwesomeSplash {
         mp.start();
     */
         //Customize Circular Reveal
-        configSplash.setBackgroundColor(R.color.colorPrimaryDark); //any color you want form colors.xml
+        configSplash.setBackgroundColor(R.color.cyan_color); //any color you want form colors.xml
         configSplash.setAnimCircularRevealDuration(1000); //int ms
         configSplash.setRevealFlagX(Flags.REVEAL_TOP);  //or Flags.REVEAL_LEFT
         configSplash.setRevealFlagY(Flags.REVEAL_BOTTOM); //or Flags.REVEAL_TOP
@@ -57,8 +57,8 @@ public class SplashScreen extends AwesomeSplash {
     public void animationsFinished() {
         Intent intent = new Intent(SplashScreen.this,
                 MainActivity.class);
-
         startActivity(intent);
+        finish();
 
     }
 }

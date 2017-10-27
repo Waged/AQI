@@ -16,11 +16,11 @@
 
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/avi"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_gravity="center"
-            app:indicatorColor="@color/dsb_progress_color"
-            app:indicatorName="BallPulseIndicator" />
+            app:indicatorColor="@color/cyan_color"
+            app:indicatorName="BallGridPulseIndicator" />
     </FrameLayout>
 
 
