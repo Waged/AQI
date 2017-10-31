@@ -36,12 +36,11 @@ public class SplashScreen extends AwesomeSplash {
         configSplash.setAnimLogoSplashTechnique(Techniques.DropOut);
         configSplash.setAnimLogoSplashDuration(1500);
         //configSplash.setAnimLogoSplashTechnique(Techniques.BounceInLeft);
-
         //choose one form Techniques (ref: https://gi.com/daimajia/AndroidViewAnimations)
 
 
         //Customize Title
-        configSplash.setTitleSplash("Know What You breath !");
+        configSplash.setTitleSplash("Know What You breathe !");
         configSplash.setTitleTextColor(R.color.colorPrimary);
         configSplash.setTitleTextSize(32f); //float value
         configSplash.setAnimTitleDuration(950);

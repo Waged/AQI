@@ -28,20 +28,24 @@ import android.support.v7.widget.CardView;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.jjoe64.graphview.GraphView;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.yalantis.phoenix.PullToRefreshView;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -52,25 +56,12 @@ import butterknife.OnClick;
 import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.R;
 
+import static pl.pawelkleczkowski.customgauge.R.id.text;
+
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-
-    final String url = "https://www.facebook.com/aqiindia/";
-    // Constants:
-    final int REQUEST_CODE = 123;
+        implements NavigationView.OnNavigationItemSelectedListener ,LocationListener{
     // Base URL
-    //final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/forecast";
-    // App ID to use OpenWeather data
-    //final String APP_ID = "e72ca729af228beabd5d20e3b7749713";
-    //e72ca729af228beabd5d20e3b7749713
-    // Time between location updates (5000 milliseconds or 5 seconds)
-    final long MIN_TIME = 0;
-    // Distance between location updates (1000m or 1km)
-    final float MIN_DISTANCE = 0;
-
-
-    public static boolean gps_enabled = false;
-    public static boolean network_enabled = false;
+    final String url = "https://www.facebook.com/aqiindia/";
 
     @BindView(R.id.drawer_layout)
     FlowingDrawer mDrawer;
@@ -108,35 +99,24 @@ public class MainActivity extends AppCompatActivity
     CardView locationCard;
     @BindView(R.id.avi)
     AVLoadingIndicatorView avi;
-    @BindView(R.id.graph)
-    GraphView graphView ;
-
-
+    @BindView(R.id.chart)
+    BarChart chart;
 
 
     Animation fade;
     MediaPlayer mp;
-    // Location provider will be used in AQI
-    String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
+
 
     // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mLocationManager;
     LocationListener mLocationListener;
     double latitude, longitude;
-
-    public static Intent newFacebookIntent(PackageManager pm, String url) {
-        Uri uri = Uri.parse(url);
-        try {
-            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
-            if (applicationInfo.enabled) {
-                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
-                Log.d("facebookredirecting", "welldone");
-            }
-        } catch (PackageManager.NameNotFoundException ignored) {
-            Log.d("facebookredirecting", "badme");
-        }
-        return new Intent(Intent.ACTION_VIEW, uri);
-    }
+    String NETWORK_LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
+    final long MIN_TIME = 0;        // Time between location updates (5000 milliseconds or 5 seconds)
+    final float MIN_DISTANCE = 0;  // Distance between location updates (1000m or 1km)
+    public static boolean gps_enabled = false;
+    public static boolean network_enabled = false;
+    final int REQUEST_CODE = 1;
 
     @Override
     protected void onStart() {
@@ -148,37 +128,40 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Log.e("onResume", "Called");
         if (android.os.Build.VERSION.SDK_INT <= 22) {
-            Log.e("onResume", "Called");
+            Log.e("sdkLess22", " right");
             LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             try {
-                boolean gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                 gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                Log.d("gps","status: "+gps_enabled);
             } catch (Exception ex) {
                 Log.e("gps", ex.toString());
             }
-
             try {
-                boolean network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                 Log.d("network","status: "+gps_enabled);
             } catch (Exception ex) {
                 Log.e("network", ex.toString());
             }
             if (!gps_enabled && !network_enabled) {
-
                 displayPromptForEnablingGPS(this);
             }
         } else {
-
+            Log.e("sdkGreater22", " right");
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                     PackageManager.PERMISSION_GRANTED &&
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                             != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
-
+                Log.e("permGrantedInOnresume", "right");
             } else {
                 displayPromptForEnablingGPS(this);
+                Log.e("permGrantedInOnresume", "right");
             }
         }
         getWeatherForCurrentLocation();
+        Log.e("getWeatherForCurrentLoc","Called from onResume");
     }
 
 
@@ -187,12 +170,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-       // bus.post(new ForecastServices.SearchForecastsRequest("query"));
-
-
 
         //TODO:Typeface for Texts
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/moodyrock.ttf");
+        //Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/moodyrock.ttf");
         //   Typeface tf2 = Typeface.createFromAsset(getAssets(),"fonts/arizona.ttf");
         //   Typeface tf3 = Typeface.createFromAsset(getAssets(),"fonts/grand_hotel.otf");
         Typeface tfRobotoBlack = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Black.ttf");
@@ -259,6 +239,16 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+
+
+        BarData data = new BarData(getXAxisValues(),getDataSet());
+        chart.setData(data);
+        //chart.setDescription("AQI Level");
+        chart.animateXY(2000, 2000);
+        chart.getAxisLeft().setDrawGridLines(false);
+        chart.getXAxis().setDrawGridLines(false);
+        chart.invalidate();
+        chart.setDrawGridBackground(false);
     }
 
     @Override
@@ -273,6 +263,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    //For Menu to Override method
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@Nullable MenuItem item) {
@@ -280,12 +271,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.e("OnPause", "Happened");
-    }
 
     // TODO: Add getWeatherForCurrentLocation() here:
     private void getWeatherForCurrentLocation() {
@@ -301,6 +286,7 @@ public class MainActivity extends AppCompatActivity
                 longitude = location.getLongitude();
                 Log.e("onLocationChanged", "Latitude =" + latitude + "longitude =" + longitude);
                 if (latitude != 0.0 && longitude != 0.0) {
+                    Log.e("location","location Achieved");
                     new FindMe(MainActivity.this).execute();
                 }
             }
@@ -328,45 +314,73 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        mLocationManager.requestLocationUpdates(LOCATION_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
+        mLocationManager.requestLocationUpdates(NETWORK_LOCATION_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
+    }
+
+
+    //TODO: Location Listeners
+    @Override
+    public void onLocationChanged(Location location) {
+       double lat =  location.getLatitude();
+       double lng = location.getLongitude();
+        Log.e("onLocationChanged","Called");
+    }
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
     }
 
     //TODO: AsyncTask to fetch user location
-    public class FindMe extends AsyncTask<Void, Void, String> {
+    private class FindMe extends AsyncTask<Void, Void, String> {
         private Context appContext;
-
-        public FindMe(Context appContext) {
+        private FindMe(Context appContext) {
             this.appContext = appContext;
         }
-
         @Override
         protected String doInBackground(Void... voids) {
             Log.e("doInBackground", "Called");
             Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
-            List<Address> addresses = null;
+            List<Address> addresses ;
 
             try {
                 addresses = geocoder.getFromLocation(latitude, longitude, 1);
                 if (addresses != null && addresses.size() > 0) {
                     Log.e("Adress", addresses.toString());
                     Address address = addresses.get(0);
-                    String cityName = address.getAddressLine(0);
+                   // String cityName = address.getAddressLine(0);
                     StringBuilder strReturnedAddress = new StringBuilder("");
 
                     for (int i = 0; i <= 2; i++) {
                         strReturnedAddress.append(address.getAddressLine(i)).append(",");
                     }
                     String strAdd = strReturnedAddress.toString();
-                    String state = addresses.get(0).getAdminArea();
+                   // String state = addresses.get(0).getAdminArea();
                     String city = addresses.get(0).getLocality();
                     String country = addresses.get(0).getCountryName();
                     String knownName = addresses.get(0).getFeatureName();
-                    String full = address.getAddressLine(0);
+                  //  String full = address.getAddressLine(0);
                     Log.e("cityName", city);
                     // tvPlace.setText(cityName+" "+stateName);
                     if (knownName != null) {
                         String myPlaceNow = knownName + ", " + city + ", " + country;
-                        return myPlaceNow.trim();
+                        String myPlaceNowSmall =knownName + ", " + city;
+                        if(myPlaceNow.length() > 33){
+                            return myPlaceNowSmall.trim();
+                        }else{
+                            return myPlaceNow.trim();
+                        }
+
 
                     }
                     Log.e("knownName", "is empty");
@@ -378,7 +392,6 @@ public class MainActivity extends AppCompatActivity
             }
             return null;
         }
-
         protected void onPostExecute(String result) {
             tvPlace.setText(result);
             tvCurrentLocation.setText(result);
@@ -388,17 +401,18 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("clima", "OnRequestPermission:permission Granted");
                 getWeatherForCurrentLocation();
+                Log.e("getWeatherForCurrentLoc","Called from onRequest");
             } else {
                 Log.d("clima", "OnRequestPermission:permission Failed");
-                //Toasty.error(this, "App needs Permision to fetch AQI", Toast.LENGTH_SHORT).show();
-                // tvCurrentLocation.setText("Enable Permission");
+                // Toasty.error(this, "App needs Permision to fetch AQI", Toast.LENGTH_SHORT).show();
+                 //tvCurrentLocation.setText("Enable Permission");
                 // tvPlace.setText("GPS Off");
             }
         }
@@ -443,7 +457,7 @@ public class MainActivity extends AppCompatActivity
 
     //ToDO: Managing Clicks
     @OnClick(R.id.btnLocations)
-    void locationButton(View view) {
+    void locationButton() {
         mp.start();
         //btnLocation.startAnimation(fade);
         Intent map = new Intent(MainActivity.this, MapsActivity.class);
@@ -497,6 +511,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @OnClick(R.id.btnFacebook)
+
+
     void facebookBtn() {
         mp.start();
         //btnFacebook.setAnimation(fade);
@@ -504,6 +520,71 @@ public class MainActivity extends AppCompatActivity
         Toasty.info(MainActivity.this, "Facebook Redirecting", Toast.LENGTH_SHORT).show();
         startActivity(newFacebookIntent(getPackageManager(), url));
     }
+    //facebook re-directing
+    public static Intent newFacebookIntent(PackageManager pm, String url) {
+        Uri uri = Uri.parse(url);
+        try {
+            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
+            if (applicationInfo.enabled) {
+                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
+                Log.d("facebookredirecting", "welldone");
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+            Log.d("facebookredirecting", "badme");
+        }
+        return new Intent(Intent.ACTION_VIEW, uri);
+    }
+
+    private ArrayList<BarDataSet> getDataSet() {
+        ArrayList<BarDataSet> dataSets ;
+
+        ArrayList<BarEntry> valueSet1 = new ArrayList<>();
+        BarEntry v1e1 = new BarEntry(110.000f, 0); // Jan
+        valueSet1.add(v1e1);
+        BarEntry v1e2 = new BarEntry(40.000f, 1); // Feb
+        valueSet1.add(v1e2);
+        BarEntry v1e3 = new BarEntry(60.000f, 2); // Mar
+        valueSet1.add(v1e3);
+        BarEntry v1e4 = new BarEntry(30.000f, 3); // Apr
+        valueSet1.add(v1e4);
+        BarEntry v1e5 = new BarEntry(90.000f, 4); // May
+        valueSet1.add(v1e5);
+        BarEntry v1e6 = new BarEntry(100.000f, 5); // Jun
+        valueSet1.add(v1e6);
+        ArrayList<BarEntry> valueSet2 = new ArrayList<>();
+        BarEntry v2e1 = new BarEntry(150.000f, 0); // Jan
+        valueSet2.add(v2e1);
+        BarEntry v2e2 = new BarEntry(90.000f, 1); // Feb
+        valueSet2.add(v2e2);
+        BarEntry v2e3 = new BarEntry(120.000f, 2); // Mar
+        valueSet2.add(v2e3);
+        BarEntry v2e4 = new BarEntry(60.000f, 3); // Apr
+        valueSet2.add(v2e4);
+        BarEntry v2e5 = new BarEntry(20.000f, 4); // May
+        valueSet2.add(v2e5);
+        BarEntry v2e6 = new BarEntry(80.000f, 5); // Jun
+        valueSet2.add(v2e6);
+        BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Good");
+        barDataSet1.setColor(Color.rgb(0, 155, 0));
+        BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Bad");
+        barDataSet2.setColors(ColorTemplate.COLORFUL_COLORS);
+        dataSets = new ArrayList<>();
+        dataSets.add(barDataSet1);
+        dataSets.add(barDataSet2);
+        return dataSets;
+    }
+    private ArrayList<String> getXAxisValues() {
+        ArrayList<String> xAxis = new ArrayList<>();
+        xAxis.add("JAN");
+        xAxis.add("FEB");
+        xAxis.add("MAR");
+        xAxis.add("APR");
+        xAxis.add("MAY");
+        xAxis.add("JUN");
+        return xAxis;
+    }
+
+
 
 
 }
