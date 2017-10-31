@@ -31,7 +31,7 @@ public class SplashScreen extends AwesomeSplash {
         //configSplash.setRevealFlagY(Flags.REVEAL_BOTTOM);
         //Choose LOGO OR PATH; if you don't provide String value for path it's logo by default
         //Customize Logo
-        configSplash.setLogoSplash(R.drawable.aqi_splash); //or any other drawable
+        configSplash.setLogoSplash(R.drawable.ic_aqi_logo_title); //or any other drawable
         //configSplash.setAnimLogoSplashDuration(500); //int ms
         configSplash.setAnimLogoSplashTechnique(Techniques.DropOut);
         configSplash.setAnimLogoSplashDuration(1500);

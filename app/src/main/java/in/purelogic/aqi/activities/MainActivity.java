@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+//import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -28,7 +29,6 @@ import android.support.v7.widget.CardView;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
-import android.view.MenuItem;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -56,7 +56,6 @@ import butterknife.OnClick;
 import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.R;
 
-import static pl.pawelkleczkowski.customgauge.R.id.text;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener ,LocationListener{
@@ -101,10 +100,13 @@ public class MainActivity extends AppCompatActivity
     AVLoadingIndicatorView avi;
     @BindView(R.id.chart)
     BarChart chart;
-
-
     Animation fade;
     MediaPlayer mp;
+    //SharedPreferences locationSharedPreferences;
+   // public static final String myLocationPrefs = "locationPrefs" ;
+   // public static final String latPrefs = "latitude";
+    //public static final String lngPrefs = "longitude";
+   // public static final String aqiPrefs = "aqiValue";
 
 
     // TODO: Declare a LocationManager and a LocationListener here:
@@ -200,7 +202,7 @@ public class MainActivity extends AppCompatActivity
         tvDate.setText(dayOfTheWeek + ", " + monthString + " " + day);
         locationCard.setCardBackgroundColor(Color.TRANSPARENT);
         locationCard.setCardElevation(4.0f);
-
+        //locationSharedPreferences = getSharedPreferences(myLocationPrefs, Context.MODE_PRIVATE);
 
         //Todo: Elastic Drawer to view Settings
         mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
@@ -284,18 +286,16 @@ public class MainActivity extends AppCompatActivity
                 Log.e("onLocationChanged", "called");
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
-                Log.e("onLocationChanged", "Latitude =" + latitude + "longitude =" + longitude);
+                Log.e("onLocationChanged", "Latitude =" + latitude + " longitude =" + longitude);
                 if (latitude != 0.0 && longitude != 0.0) {
                     Log.e("location","location Achieved");
                     new FindMe(MainActivity.this).execute();
                 }
             }
-
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
 
             }
-
             @Override
             public void onProviderEnabled(String provider) {
 
@@ -321,8 +321,15 @@ public class MainActivity extends AppCompatActivity
     //TODO: Location Listeners
     @Override
     public void onLocationChanged(Location location) {
-       double lat =  location.getLatitude();
-       double lng = location.getLongitude();
+       //double lat =  location.getLatitude();
+      // double lng = location.getLongitude();
+        /*
+        SharedPreferences.Editor editor = locationSharedPreferences.edit();
+        editor.putString(latPrefs, lat+"");
+        editor.putString(lngPrefs, lng+"");
+        //editor.putString(aqiPrefs, e);
+        editor.commit();
+        */
         Log.e("onLocationChanged","Called");
     }
 
@@ -511,8 +518,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @OnClick(R.id.btnFacebook)
-
-
     void facebookBtn() {
         mp.start();
         //btnFacebook.setAnimation(fade);
@@ -520,6 +525,20 @@ public class MainActivity extends AppCompatActivity
         Toasty.info(MainActivity.this, "Facebook Redirecting", Toast.LENGTH_SHORT).show();
         startActivity(newFacebookIntent(getPackageManager(), url));
     }
+
+
+    @OnClick(R.id.myCardView)
+    void goToMaps () {
+        Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);
+        if(latitude !=0 && longitude!=0){
+        mapIntent.putExtra("latitude",latitude);
+        mapIntent.putExtra("longitude",longitude);
+        mapIntent.putExtra("aqi","22");
+        }
+        startActivity(mapIntent);
+    }
+
+
     //facebook re-directing
     public static Intent newFacebookIntent(PackageManager pm, String url) {
         Uri uri = Uri.parse(url);
