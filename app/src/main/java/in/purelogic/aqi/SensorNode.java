@@ -11,6 +11,8 @@ public class SensorNode {
     private String temprature;
     private String locationName;
 
+
+
     public SensorNode(double latitude, double longitude, String aqiValue, String pm25Value,
                       String humidity, String temprature, String locationName) {
         this.latitude = latitude;
