@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener ,LocationListener{
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
-
+    String myPlaceNow;
+    String myPlaceNowSmall;
     @BindView(R.id.drawer_layout)
     FlowingDrawer mDrawer;
     @BindView(R.id.btnLocations)
@@ -229,6 +230,7 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         mPullToRefreshView.setRefreshing(false);
                         Toast.makeText(MainActivity.this, "Refreshing..", Toast.LENGTH_SHORT).show();
+                        getWeatherForCurrentLocation();
                         Date date = Calendar.getInstance().getTime();
                         String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
                         String day = (String) DateFormat.format("dd", date); // 20
@@ -380,8 +382,8 @@ public class MainActivity extends AppCompatActivity
                     Log.e("cityName", city);
                     // tvPlace.setText(cityName+" "+stateName);
                     if (knownName != null) {
-                        String myPlaceNow = knownName + ", " + city + ", " + country;
-                        String myPlaceNowSmall =knownName + ", " + city;
+                         myPlaceNow = knownName + ", " + city + ", " + country;
+                         myPlaceNowSmall =knownName + ", " + city;
                         if(myPlaceNow.length() > 33){
                             return myPlaceNowSmall.trim();
                         }else{
@@ -395,7 +397,7 @@ public class MainActivity extends AppCompatActivity
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return "Couldn't Locate";
+                return "Couldn't locate..";
             }
             return null;
         }
@@ -534,6 +536,7 @@ public class MainActivity extends AppCompatActivity
         mapIntent.putExtra("latitude",latitude);
         mapIntent.putExtra("longitude",longitude);
         mapIntent.putExtra("aqi","22");
+        mapIntent.putExtra("location",myPlaceNow);
         }
         startActivity(mapIntent);
     }
@@ -583,13 +586,33 @@ public class MainActivity extends AppCompatActivity
         valueSet2.add(v2e5);
         BarEntry v2e6 = new BarEntry(80.000f, 5); // Jun
         valueSet2.add(v2e6);
+        ArrayList<BarEntry> valueSet3 = new ArrayList<>();
+        BarEntry v3e1 = new BarEntry(110.000f, 0); // Jan
+        valueSet3.add(v3e1);
+        BarEntry v3e2 = new BarEntry(40.000f, 1); // Feb
+        valueSet3.add(v3e2);
+        BarEntry v3e3 = new BarEntry(60.000f, 2); // Mar
+        valueSet3.add(v3e3);
+        BarEntry v3e4 = new BarEntry(30.000f, 3); // Apr
+        valueSet3.add(v3e4);
+        BarEntry v3e5 = new BarEntry(90.000f, 4); // May
+        valueSet3.add(v3e5);
+        BarEntry v3e6 = new BarEntry(100.000f, 5); // Jun
+        valueSet3.add(v3e6);
+
         BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Good");
         barDataSet1.setColor(Color.rgb(0, 155, 0));
+
         BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Bad");
         barDataSet2.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        BarDataSet barDataSet3 = new BarDataSet(valueSet3, "very bad");
+        barDataSet3.setColors(ColorTemplate.VORDIPLOM_COLORS);
+
         dataSets = new ArrayList<>();
         dataSets.add(barDataSet1);
         dataSets.add(barDataSet2);
+        dataSets.add(barDataSet3);
         return dataSets;
     }
     private ArrayList<String> getXAxisValues() {
