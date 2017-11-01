@@ -19,8 +19,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @BindView(R.id.card_tvMyLocation)
     TextView tvLocation;
-    @BindView(R.id.tvAqiMaps)
-    TextView tvAqi;
+
 
 
     private GoogleMap mMap;
@@ -39,7 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         longitude = bundle.getDouble("longitude");
         myLocation = bundle.getString("location");
         aqi = bundle.getString("aqi");
-        tvAqi.setText(aqi);
+        //tvAqi.setText(aqi);
         tvLocation.setText(myLocation);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
