@@ -10,11 +10,13 @@ public class SensorNode {
     private String humidity;
     private String temprature;
     private String locationName;
+    private String condition;
+    private String timeStamp;
 
 
 
     public SensorNode(double latitude, double longitude, String aqiValue, String pm25Value,
-                      String humidity, String temprature, String locationName) {
+                      String humidity, String temprature, String locationName , String condition,String timeStamp) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.aqiValue = aqiValue;
@@ -22,8 +24,11 @@ public class SensorNode {
         this.humidity = humidity;
         this.temprature = temprature;
         this.locationName = locationName;
+        this.condition = condition;
+        this.timeStamp = timeStamp;
     }
 
+    //TODO:Setters
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
@@ -52,6 +57,16 @@ public class SensorNode {
         this.locationName = locationName;
     }
 
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+
+    //TODO: Getters
     public double getLatitude() {
         return latitude;
     }
@@ -76,7 +91,12 @@ public class SensorNode {
         return temprature;
     }
 
-    public String getLocationName() {
-        return locationName;
+    public String getLocationName() {return locationName;}
+
+    public String getCondition() {return condition;}
+
+    public String getTimeStamp() {
+        return timeStamp;
     }
+
 }

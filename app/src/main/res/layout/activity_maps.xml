@@ -14,14 +14,14 @@
         tools:context="in.purelogic.aqi.activities.MapsActivity" />
 
     <android.support.v7.widget.CardView
-        android:id="@+id/card_view"
+        android:id="@+id/map_card_view"
         cardBackgroundColor="#60b0c8db"
-        cardCornerRadius="0dp"
+        cardCornerRadius="2dp"
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_gravity="bottom"
         android:alpha=".8"
-        android:clickable="true"
         android:elevation="6dp"
         app:cardElevation="4dp">
 
@@ -31,13 +31,13 @@
 
             <ImageView
                 android:id="@+id/imageView2"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginTop="4dp"
                 android:src="@drawable/mylocation" />
 
             <TextView
-                android:id="@+id/card_tvMyLocation"
+                android:id="@+id/map_tvMyLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_alignBottom="@+id/imageView2"
@@ -45,8 +45,11 @@
                 android:layout_toRightOf="@+id/imageView2"
                 android:text="Your Location" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/ivFav"
+                android:clickable="true"
+                android:background="@null"
+                android:onClick="addToFav"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_alignParentEnd="true"
@@ -69,54 +72,82 @@
                 android:layout_marginTop="23dp"
                 android:src="@drawable/ic_pm25" />
 
-            <ImageView
-                android:id="@+id/ivHumidity"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_alignBottom="@+id/tvPm25"
-                android:layout_centerHorizontal="true"
-                android:src="@drawable/ic_temp" />
-
-            <ImageView
-                android:id="@+id/ivTemp"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_alignBottom="@+id/tvTemp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_toLeftOf="@+id/ivFav"
-                android:layout_toStartOf="@+id/ivFav"
-                android:src="@drawable/ic_humid" />
 
             <TextView
-                android:id="@+id/tvPm25"
+                android:id="@+id/map_tvPm25"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/ivPm25"
                 android:layout_toEndOf="@+id/ivPm25"
                 android:layout_toRightOf="@+id/ivPm25"
-                android:text="PM2.5" />
+                android:text="NA" />
 
             <TextView
-                android:id="@+id/tvTemp"
+                android:id="@+id/tvStaticPm25"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/map_tvPm25"
+                android:layout_toEndOf="@+id/ivPm25"
+                android:layout_toRightOf="@+id/ivPm25"
+                android:text="PM2.5" />
+
+            <ImageView
+                android:id="@+id/ivHumidity"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_alignBottom="@+id/map_tvPm25"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_temp" />
+
+            <TextView
+                android:id="@+id/map_tvTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/ivHumidity"
                 android:layout_toEndOf="@+id/ivHumidity"
                 android:layout_toRightOf="@+id/ivHumidity"
-                android:text="°C" />
-
+                android:text="NA" />
             <TextView
-                android:id="@+id/tvHumid"
+                android:id="@+id/tvStaticTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                android:layout_marginRight="15dp"
-                android:text="Humi"
-                android:layout_alignBottom="@+id/ivTemp"
-                android:layout_alignRight="@+id/ivFav"
-                android:layout_alignEnd="@+id/ivFav" />
+                android:layout_above="@+id/map_tvTemp"
+                android:layout_toEndOf="@+id/ivHumidity"
+                android:layout_toRightOf="@+id/ivHumidity"
+                android:text="°C" />
 
+
+            <ImageView
+                android:id="@+id/ivTemp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_humid"
+                android:layout_alignBottom="@+id/map_tvTemp"
+                android:layout_toLeftOf="@+id/map_tvHumid"
+                android:layout_toStartOf="@+id/map_tvHumid" />
+
+
+
+
+            <TextView
+                android:id="@+id/map_tvHumid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NA"
+                android:layout_alignBottom="@+id/ivTemp"
+                android:layout_toLeftOf="@+id/ivFav"
+                android:layout_toStartOf="@+id/ivFav" />
+
+
+
+            <TextView
+                android:id="@+id/tvStaticHumi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Humi"
+                android:layout_alignTop="@+id/ivTemp"
+                android:layout_alignLeft="@+id/map_tvHumid"
+                android:layout_alignStart="@+id/map_tvHumid" />
 
         </RelativeLayout>
     </android.support.v7.widget.CardView>
