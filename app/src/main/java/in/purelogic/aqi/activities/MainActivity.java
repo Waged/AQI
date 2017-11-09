@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 //import android.content.SharedPreferences;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -30,6 +31,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
@@ -40,10 +42,15 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
 import com.wang.avi.AVLoadingIndicatorView;
 import com.yalantis.phoenix.PullToRefreshView;
+
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,7 +60,10 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cz.msebera.android.httpclient.Header;
 import es.dmoral.toasty.Toasty;
+import in.purelogic.aqi.OutdoorDataModel;
+import in.purelogic.aqi.Palette;
 import in.purelogic.aqi.R;
 
 
@@ -61,8 +71,25 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener ,LocationListener{
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
+
+    public static final String outdoorPrefs = "outdoorPrefs" ;
+    public static final String placeName = "placename";
+    public static final String aqi = "aqi";
+    public static final String pm25 = "pm25";
+    public static final String temp = "temp";
+    public static final String humid = "humid";
+    public static final String time = "time";
+    public static final String picture1 = "picture1";
+    public static final String picture2 = "picture2";
+    public static final String picture3 = "picture3";
+    public static final String message = "message";
+
+    SharedPreferences outdoorSharedpreferences;
+    private static String SENSOR_OUTDOOR_URL = "aqi.in/outdoor";
     String myPlaceNow;
     String myPlaceNowSmall;
+
+
     @BindView(R.id.drawer_layout)
     FlowingDrawer mDrawer;
     @BindView(R.id.btnLocations)
@@ -103,13 +130,13 @@ public class MainActivity extends AppCompatActivity
     BarChart chart;
     Animation fade;
     MediaPlayer mp;
+
+
     //SharedPreferences locationSharedPreferences;
-   // public static final String myLocationPrefs = "locationPrefs" ;
-   // public static final String latPrefs = "latitude";
+    // public static final String myLocationPrefs = "locationPrefs" ;
+    // public static final String latPrefs = "latitude";
     //public static final String lngPrefs = "longitude";
-   // public static final String aqiPrefs = "aqiValue";
-
-
+    // public static final String aqiPrefs = "aqiValue";
     // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mLocationManager;
     LocationListener mLocationListener;
@@ -127,23 +154,19 @@ public class MainActivity extends AppCompatActivity
         Log.e("onStart", "Called");
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e("onResume", "Called");
+    private void CheckOldAndroidVersion(){
         if (android.os.Build.VERSION.SDK_INT <= 22) {
             Log.e("sdkLess22", " right");
             LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             try {
-                 gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
                 Log.d("gps","status: "+gps_enabled);
             } catch (Exception ex) {
                 Log.e("gps", ex.toString());
             }
             try {
-                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                 Log.d("network","status: "+gps_enabled);
+                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                Log.d("network","status: "+gps_enabled);
             } catch (Exception ex) {
                 Log.e("network", ex.toString());
             }
@@ -163,10 +186,16 @@ public class MainActivity extends AppCompatActivity
                 Log.e("permGrantedInOnresume", "right");
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("onResume", "Called");
+        CheckOldAndroidVersion();
         getWeatherForCurrentLocation();
         Log.e("getWeatherForCurrentLoc","Called from onResume");
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,7 +232,7 @@ public class MainActivity extends AppCompatActivity
         tvDate.setText(dayOfTheWeek + ", " + monthString + " " + day);
         locationCard.setCardBackgroundColor(Color.TRANSPARENT);
         locationCard.setCardElevation(4.0f);
-        //locationSharedPreferences = getSharedPreferences(myLocationPrefs, Context.MODE_PRIVATE);
+        outdoorSharedpreferences = getSharedPreferences(outdoorPrefs, Context.MODE_PRIVATE);
 
         //Todo: Elastic Drawer to view Settings
         mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
@@ -266,13 +295,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-    //For Menu to Override method
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@Nullable MenuItem item) {
-        return true;
-    }
 
 
 
@@ -469,9 +491,9 @@ public class MainActivity extends AppCompatActivity
     void locationButton() {
         mp.start();
         //btnLocation.startAnimation(fade);
-        Intent map = new Intent(MainActivity.this, MapsActivity.class);
-        startActivity(map);
-       // mDrawer.closeMenu();
+        Intent loc = new Intent(MainActivity.this, SavedLocations.class);
+        mDrawer.closeMenu();
+        startActivity(loc);
     }
 
     @OnClick(R.id.btnNotification)
@@ -540,7 +562,6 @@ public class MainActivity extends AppCompatActivity
         }
         startActivity(mapIntent);
     }
-
 
     //facebook re-directing
     public static Intent newFacebookIntent(PackageManager pm, String url) {
@@ -626,7 +647,80 @@ public class MainActivity extends AppCompatActivity
         return xAxis;
     }
 
+//Todo onNoNeedGettingDataFromServer
+    private void getSavedValues() {
+        String mPlaceName = outdoorSharedpreferences.getString(placeName,"NA");
+        int mAqi= outdoorSharedpreferences.getInt(aqi,0);
+        int mPm25= outdoorSharedpreferences.getInt(pm25,0);
+        double mTemperature = outdoorSharedpreferences.getFloat(temp,0.0f);
+        int mHumidity= outdoorSharedpreferences.getInt(humid,0);
+        String mTime = outdoorSharedpreferences.getString(time,"NA");
+        OutdoorDataModel outdoorData = new OutdoorDataModel(mPlaceName,mAqi,mPm25,mTemperature,mHumidity,mTime);
+        updateOutdoorUi(outdoorData);
+        Toast.makeText(MainActivity.this, "Already have The latest Data", Toast.LENGTH_SHORT).show();
+    }
 
+    private void letsDoSomeNetworkingOutdoor() {
+        avi.show();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.post(SENSOR_OUTDOOR_URL, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
+                OutdoorDataModel outdoorData = OutdoorDataModel.fromJson(response);
+                Log.d("climaX", "Fail" + response.toString());
+                if (outdoorData == null || outdoorData.getmPm25() == 0) {
+                    getSavedValues();
+                    avi.setVisibility(View.INVISIBLE);
+                    return;
+                }
+                boolean saved = saveOutdoorValues(outdoorData);
+                if(saved){
+                    updateOutdoorUi(outdoorData);
+                }
+                avi.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, e, errorResponse);
+                getSavedValues();
+                avi.setVisibility(View.INVISIBLE);
+
+            }
+        });
+    }
+
+    private boolean saveOutdoorValues(OutdoorDataModel outdoorData) {
+        SharedPreferences.Editor editor = outdoorSharedpreferences.edit();
+        editor.putString(placeName,outdoorData.getmPlaceName());
+        editor.putInt(aqi,outdoorData.getmAqi());
+        editor.putInt(pm25,outdoorData.getmPm25() );
+        editor.putFloat(temp,(float)outdoorData.getmTemperature() );
+        editor.putInt(humid,outdoorData.getmHumidity() );
+        editor.putString(time,outdoorData.getmTimeStamp());
+        return editor.commit();
+    }
+
+    private void updateOutdoorUi(OutdoorDataModel outdoorData) {
+        Palette palette = new Palette();
+       // outdoorCardView.setBackgroundColor(palette.getTxtColor(this, palette.getConditionAqi(outdoorData.getmAqi())));
+      //  outdoorCardText.setText(palette.getConditionString(outdoorData.getmAqi()));
+      //  ivPm25SignOutdoor.setImageResource(outdoorData.getmPm25Drawable());
+      //  outdoorMeter.speedTo(outdoorData.getmAqi(), 1000);
+      //  tvOutdoorPM25.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmPm25()));
+      //  tvOutdoorPM25.setTextColor(palette.getTxtColor(this, palette.getConditionPm25(outdoorData.getmPm25())));
+      //  tvOutdoorTemp.setText(String.format(Locale.getDefault(), "%1$,.1f", outdoorData.getmTemperature()));
+     //   tvOutdoorHumid.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmHumidity()));
+       // tvOutdoorTime.setText( outdoorData.getmTimeStamp());
+    }
+
+    //For Menu to Override method
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@Nullable MenuItem item) {
+        return true;
+    }
 
 
 }

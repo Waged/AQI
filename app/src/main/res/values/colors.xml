@@ -21,4 +21,13 @@
     <color name="colorGreen">#24deaf</color>
     <color name="colorYellow">#dede2a</color>
     <color name="colorGrey">#dddddc</color>
+
+    <color name="Red">#ed266a</color>
+    <color name="Grey">#dfd6d9</color>
+    <color name="good">#6c12af63</color>
+    <color name="satisfactory">#56b905</color>
+    <color name="moderate">#fea82f</color>
+    <color name="bad">#e3180a</color>
+    <color name="unhealthy">#8B38FF</color>
+    <color name="hazardous">#C20017</color>
 </resources>
