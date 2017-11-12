@@ -412,14 +412,13 @@ public class MainActivity extends AppCompatActivity
                             return myPlaceNow.trim();
                         }
 
-
                     }
                     Log.e("knownName", "is empty");
                     return strAdd;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return "Couldn't locate..";
+                return "Re-locating..";
             }
             return null;
         }

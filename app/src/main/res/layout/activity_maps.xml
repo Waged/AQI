@@ -92,7 +92,7 @@
                 android:text="PM2.5" />
 
             <ImageView
-                android:id="@+id/ivHumidity"
+                android:id="@+id/ivHumidrature"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_alignBottom="@+id/map_tvPm25"
@@ -103,22 +103,22 @@
                 android:id="@+id/map_tvTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/ivHumidity"
-                android:layout_toEndOf="@+id/ivHumidity"
-                android:layout_toRightOf="@+id/ivHumidity"
+                android:layout_alignBottom="@+id/ivHumidrature"
+                android:layout_toEndOf="@+id/ivHumidrature"
+                android:layout_toRightOf="@+id/ivHumidrature"
                 android:text="NA" />
             <TextView
                 android:id="@+id/tvStaticTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/map_tvTemp"
-                android:layout_toEndOf="@+id/ivHumidity"
-                android:layout_toRightOf="@+id/ivHumidity"
+                android:layout_toEndOf="@+id/ivHumidrature"
+                android:layout_toRightOf="@+id/ivHumidrature"
                 android:text="°C" />
 
 
             <ImageView
-                android:id="@+id/ivTemp"
+                android:id="@+id/ivHumid"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:src="@drawable/ic_humid"
@@ -134,7 +134,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="NA"
-                android:layout_alignBottom="@+id/ivTemp"
+                android:layout_alignBottom="@+id/ivHumid"
                 android:layout_toLeftOf="@+id/ivFav"
                 android:layout_toStartOf="@+id/ivFav" />
 
@@ -145,7 +145,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Humi"
-                android:layout_alignTop="@+id/ivTemp"
+                android:layout_alignTop="@+id/ivHumid"
                 android:layout_alignLeft="@+id/map_tvHumid"
                 android:layout_alignStart="@+id/map_tvHumid" />
 
