@@ -172,9 +172,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
-        SavedLocations.places.add(label);
-        SavedLocations.arrayAdapter.notifyDataSetChanged();
-        SavedLocations.locations.add(point);
+       // SavedLocations.places.add(label);
+       // SavedLocations.arrayAdapter.notifyDataSetChanged();
+        //SavedLocations.locations.add(point);
 
         mMap.addMarker(new MarkerOptions()
                 .position(point)

@@ -13,16 +13,27 @@
 <TextView
     android:layout_width="match_parent"
     android:text="My Saved Locations"
-    android:layout_marginTop="20dp"
+    android:layout_marginTop="25dp"
     android:typeface="serif"
     android:gravity="center"
     android:layout_height="30dp" />
+<Button
+    android:id="@+id/btnAddNewFav"
+    android:onClick="AddNewFavPlace"
+    android:drawableRight="@android:drawable/ic_menu_add"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textColor="@color/colorWhite"
+    android:layout_marginBottom="4dp"
+    android:layout_marginTop="4dp"
+    android:text="Add New Place "
+    android:background="@color/colorTextPrimaryGood"/>
+
 
         <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 
 </LinearLayout>
 </LinearLayout>
