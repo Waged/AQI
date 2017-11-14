@@ -21,8 +21,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -33,6 +35,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.R;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback , GoogleMap.OnMapLongClickListener {
@@ -62,31 +65,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     int location = -1;
     LocationManager locationManager;
     String provider;
-
-
-
-/*
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        setUpMapIfNeeded();
-
-        if (location == -1 || location == 0) {
-
-            locationManager.requestLocationUpdates(provider, 400, 1, this);
-
-        }
-    }
+    Bundle bundle;
+    BitmapDescriptor icon;
+    Marker m = null;
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        locationManager.removeUpdates(this);
+       // locationManager.removeUpdates((LocationListener) MapsActivity.this);
     }
-
-    */
 
 
     @Override
@@ -94,27 +81,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         ButterKnife.bind(this);
+         icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_maps_icon);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
+         bundle = getIntent().getExtras();
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            latitude = bundle.getDouble("latitude");
-            longitude = bundle.getDouble("longitude");
-            myLocation = bundle.getString("location");
-            aqi = bundle.getString("aqi");
-            tvLocation.setText(myLocation);
-        }
-        else {
-            Intent back = new Intent(this , MainActivity.class);
-            Toast.makeText(this, "No place Provided check GPS", Toast.LENGTH_SHORT).show();
-            startActivity(back);
-        }
+
         //tvAqi.setText(aqi);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
         Intent i = getIntent();
         location = i.getIntExtra("locationInfo", -1);
       //  setUpMapIfNeeded();
@@ -132,18 +110,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMapLongClickListener(MapsActivity.this);
+        if (bundle != null) {
+            latitude = bundle.getDouble("latitude");
+            longitude = bundle.getDouble("longitude");
+            myLocation = bundle.getString("location");
+            aqi = bundle.getString("aqi");
+            tvLocation.setText(myLocation);
+            LatLng myPlace = new LatLng(latitude, longitude);
+            mMap.addMarker(new MarkerOptions().position(myPlace).title(myLocation).icon(icon).snippet("Current Location! "));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(myPlace));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        }
+        else {
+            //delhi in map
+            LatLng delhiPlace = new LatLng(28.7041, 77.1025);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(delhiPlace));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
+            tvLocation.setText("NA");
+            Toasty.error(this,"GPS or Connection problem !",Toast.LENGTH_SHORT).show();
+           //Toast.makeText(this, "No place Provided check GPS", Toast.LENGTH_SHORT).show();
+        }
 
-        // Add a marker in Sydney and move the camera
-        LatLng myPlace = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(myPlace).title("Your Place "));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(myPlace));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
 
     }
 
 
     @OnClick(R.id.ivFav)
-    public void addToFavourites(View v) {
+    public void addToFavourites() {
         Toast.makeText(this, "Hello", Toast.LENGTH_SHORT).show();
         if (!isFavourite) {
             ivAddToFav.setImageResource(R.drawable.ic_favorites);
@@ -159,27 +154,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapLongClick(LatLng point) {
 
+        Toast.makeText(this, "Long Pressed", Toast.LENGTH_SHORT).show();
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-
         String label = new Date().toString();
-
-        try {
-            List<Address> listAddresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
-            if (listAddresses != null && listAddresses.size() > 0) {
-                label = listAddresses.get(0).getAddressLine(0);
+        //reference to the marker
+        if (m != null) { //if marker exists (not null or whatever)
+            try {
+                List<Address> listAddresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
+                if (listAddresses != null && listAddresses.size() > 0) {
+                    label = listAddresses.get(0).getAddressLine(0);
+                    m.setPosition(point);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        } else {
+
+
+            try {
+                List<Address> listAddresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
+                if (listAddresses != null && listAddresses.size() > 0) {
+                    label = listAddresses.get(0).getAddressLine(0);
+                    m = mMap.addMarker(new MarkerOptions()
+                            .position(point)
+                            .title(label)
+                            .icon(icon)
+                            .draggable(true));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
         }
+
+
+
+
+
 
        // SavedLocations.places.add(label);
        // SavedLocations.arrayAdapter.notifyDataSetChanged();
         //SavedLocations.locations.add(point);
 
-        mMap.addMarker(new MarkerOptions()
-                .position(point)
-                .title(label)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+                     //   BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
     }
 
 
