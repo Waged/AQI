@@ -38,9 +38,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.RadarData;
+import com.github.mikephil.charting.data.RadarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -130,7 +134,7 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.avi)
     AVLoadingIndicatorView avi;
     @BindView(R.id.chart)
-    BarChart chart;
+    RadarChart chart;
     Animation fade;
     MediaPlayer mp;
 
@@ -205,6 +209,64 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+            //ToDo: for the sake of the Radar
+            //******************************************
+        //************************************************************
+        //************************************************************
+        ArrayList<Entry> entries = new ArrayList<>();
+        entries.add(new Entry(40f, 0));
+        entries.add(new Entry(50f, 1));
+        entries.add(new Entry(20f, 2));
+        entries.add(new Entry(70f, 3));
+        entries.add(new Entry(60f, 4));
+        entries.add(new Entry(50f, 5));
+
+        ArrayList<Entry> entries2 = new ArrayList<>();
+        entries2.add(new Entry(10f, 0));
+        entries2.add(new Entry(50f, 1));
+        entries2.add(new Entry(60f, 2));
+        entries2.add(new Entry(30f, 3));
+        entries2.add(new Entry(40f, 4));
+        entries2.add(new Entry(80f, 5));
+
+        RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Today's Reading");
+
+        RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
+
+        dataset_comp1.setColor(Color.CYAN);
+        dataset_comp1.setDrawFilled(true);
+
+        dataset_comp2.setColor(Color.RED);
+        dataset_comp2.setDrawFilled(true);
+
+
+        ArrayList<RadarDataSet> dataSets = new ArrayList<RadarDataSet>();
+        dataSets.add(dataset_comp1);
+        dataSets.add(dataset_comp2);
+
+        ArrayList<String> labels = new ArrayList<String>();
+        labels.add("PM10");
+        labels.add("PM2.5");
+        labels.add("Air Quality");
+        labels.add("Ozone");
+        labels.add("HCHO");
+        labels.add("CO2");
+
+        RadarData data = new RadarData(labels, dataSets);
+        chart.setData(data);
+        //String description = "Pollutants highest Components";
+      //  chart.setDescription(description);
+        chart.setWebLineWidthInner(0.5f);
+        //chart.setDescriptionColor(Color.RED);
+        //chart.setSkipWebLineCount(10);
+        chart.invalidate();
+        chart.animate();
+
+
+        //************************************************************
+        //*********************Chart Ended Here***************************************
+        //************************************************************
+
 
         //TODO:Typeface for Texts
         //Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/moodyrock.ttf");
@@ -218,7 +280,7 @@ public class MainActivity extends AppCompatActivity
         fade = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade);
         mp = MediaPlayer.create(getApplicationContext(), R.raw.btnclick);
         tvPlace.setTypeface(tfRobotoBoldCondensed, Typeface.BOLD);
-        tvDate.setTypeface(tfRobotoBlack, Typeface.BOLD);
+        tvDate.setTypeface(tfRobotoBlack, Typeface.NORMAL);
         tvClock.setTypeface(tfRobotoBlack);
         tvAqi.setTypeface(tfRobotoBoldCondensed);
         tvAqiComment.setTypeface(tfRobotoBlackItalic);
@@ -226,7 +288,6 @@ public class MainActivity extends AppCompatActivity
         tvCurrentLocation.setTypeface(tfRobotoBold);
         tvCurrentLocation.setTextSize(18);
         tvCurrentLocation.setAnimation(fade);
-
         Date date = Calendar.getInstance().getTime();
         String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
         String day = (String) DateFormat.format("dd", date); // 20
@@ -277,14 +338,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        BarData data = new BarData(getXAxisValues(),getDataSet());
-        chart.setData(data);
-        //chart.setDescription("AQI Level");
-        chart.animateXY(2000, 2000);
-        chart.getAxisLeft().setDrawGridLines(false);
-        chart.getXAxis().setDrawGridLines(false);
-        chart.invalidate();
-        chart.setDrawGridBackground(false);
+
     }
 
     @Override
@@ -589,74 +643,6 @@ public class MainActivity extends AppCompatActivity
         return new Intent(Intent.ACTION_VIEW, uri);
     }
 
-    private ArrayList<BarDataSet> getDataSet() {
-        ArrayList<BarDataSet> dataSets ;
-
-        ArrayList<BarEntry> valueSet1 = new ArrayList<>();
-        BarEntry v1e1 = new BarEntry(110.000f, 0); // Jan
-        valueSet1.add(v1e1);
-        BarEntry v1e2 = new BarEntry(40.000f, 1); // Feb
-        valueSet1.add(v1e2);
-        BarEntry v1e3 = new BarEntry(60.000f, 2); // Mar
-        valueSet1.add(v1e3);
-        BarEntry v1e4 = new BarEntry(30.000f, 3); // Apr
-        valueSet1.add(v1e4);
-        BarEntry v1e5 = new BarEntry(90.000f, 4); // May
-        valueSet1.add(v1e5);
-        BarEntry v1e6 = new BarEntry(100.000f, 5); // Jun
-        valueSet1.add(v1e6);
-        ArrayList<BarEntry> valueSet2 = new ArrayList<>();
-        BarEntry v2e1 = new BarEntry(150.000f, 0); // Jan
-        valueSet2.add(v2e1);
-        BarEntry v2e2 = new BarEntry(90.000f, 1); // Feb
-        valueSet2.add(v2e2);
-        BarEntry v2e3 = new BarEntry(120.000f, 2); // Mar
-        valueSet2.add(v2e3);
-        BarEntry v2e4 = new BarEntry(60.000f, 3); // Apr
-        valueSet2.add(v2e4);
-        BarEntry v2e5 = new BarEntry(20.000f, 4); // May
-        valueSet2.add(v2e5);
-        BarEntry v2e6 = new BarEntry(80.000f, 5); // Jun
-        valueSet2.add(v2e6);
-        ArrayList<BarEntry> valueSet3 = new ArrayList<>();
-        BarEntry v3e1 = new BarEntry(110.000f, 0); // Jan
-        valueSet3.add(v3e1);
-        BarEntry v3e2 = new BarEntry(40.000f, 1); // Feb
-        valueSet3.add(v3e2);
-        BarEntry v3e3 = new BarEntry(60.000f, 2); // Mar
-        valueSet3.add(v3e3);
-        BarEntry v3e4 = new BarEntry(30.000f, 3); // Apr
-        valueSet3.add(v3e4);
-        BarEntry v3e5 = new BarEntry(90.000f, 4); // May
-        valueSet3.add(v3e5);
-        BarEntry v3e6 = new BarEntry(100.000f, 5); // Jun
-        valueSet3.add(v3e6);
-
-        BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Good");
-        barDataSet1.setColor(Color.rgb(0, 155, 0));
-
-        BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Bad");
-        barDataSet2.setColors(ColorTemplate.COLORFUL_COLORS);
-
-        BarDataSet barDataSet3 = new BarDataSet(valueSet3, "very bad");
-        barDataSet3.setColors(ColorTemplate.VORDIPLOM_COLORS);
-
-        dataSets = new ArrayList<>();
-        dataSets.add(barDataSet1);
-        dataSets.add(barDataSet2);
-        dataSets.add(barDataSet3);
-        return dataSets;
-    }
-    private ArrayList<String> getXAxisValues() {
-        ArrayList<String> xAxis = new ArrayList<>();
-        xAxis.add("JAN");
-        xAxis.add("FEB");
-        xAxis.add("MAR");
-        xAxis.add("APR");
-        xAxis.add("MAY");
-        xAxis.add("JUN");
-        return xAxis;
-    }
 
 //Todo onNoNeedGettingDataFromServer
     private void getSavedValues() {

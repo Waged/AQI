@@ -53,8 +53,8 @@
                         android:maxLines="1"
                         android:padding="4dp"
                         android:text="@string/locating"
-                        android:textColor="@color/dsb_progress_color"
-                        android:textSize="18sp" />
+                        android:textColor="@color/colorTextPrimaryGood"
+                        android:textSize="16sp" />
 
                     <TextClock
                         android:id="@+id/tvClock"
@@ -70,55 +70,64 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:maxLines="1"
-                        android:textColor="@color/colorBaseText"
-                        android:textSize="23sp" />
+                        android:textColor="@color/colorTextPrimaryGood"
+                        android:textSize="18sp" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:gravity="center">
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_gravity="center">
 
-
+                        <pl.droidsonroids.gif.GifImageView
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:gravity="center"
+                            android:foregroundGravity="center"
+                            android:src="@drawable/circle_loading"
+                            android:background="@null"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:id="@+id/gifImageView" />
                         <TextView
                             android:id="@+id/tvAqi"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentRight="true"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
                             android:gravity="center"
                             android:maxLines="1"
                             android:padding="30dp"
-                            android:text="NA"
-                            android:textColor="@color/colorTextPrimaryBad"
-                            android:textSize="70sp" />
+                            android:textColor="@color/bad"
+                            android:text="267"
+                            android:textSize="49sp"
+                            android:layout_alignParentTop="true"
+                            android:layout_alignStart="@+id/gifImageView"
+                            android:layout_alignLeft="@+id/gifImageView"/>
 
                         <TextView
                             android:id="@+id/aqiStatic"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignEnd="@+id/tvAqi"
-                            android:layout_alignParentTop="true"
-                            android:layout_alignRight="@+id/tvAqi"
-                            android:layout_marginTop="16dp"
-                            android:gravity="center"
                             android:maxLines="1"
                             android:padding="4dp"
                             android:text="AQI"
-                            android:textColor="@color/colorBaseText"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            android:layout_alignParentTop="true"
+                            android:layout_toRightOf="@+id/gifImageView"
+                            android:layout_toEndOf="@+id/gifImageView" />
 
                         <TextView
                             android:id="@+id/textView"
                             android:layout_width="wrap_content"
-                            android:layout_height="20dp"
+                            android:layout_height="30dp"
                             android:paddingStart="8dp"
                             android:paddingLeft="8dp"
-                            android:layout_alignBaseline="@+id/tvAqi"
-                            android:layout_alignBottom="@+id/tvAqi"
-                            android:layout_alignEnd="@+id/tvAqi"
-                            android:layout_alignRight="@+id/tvAqi"
-                            android:text="/500" />
+                            android:text="/500"
+                            android:layout_alignParentBottom="true"
+                            android:layout_toEndOf="@+id/tvAqi"
+                            android:layout_toRightOf="@+id/tvAqi" />
                     </RelativeLayout>
+
 
 
                     <TextView
@@ -128,7 +137,7 @@
                         android:gravity="center"
                         android:maxLines="1"
                         android:paddingBottom="4dp"
-                        android:text="...Waiting..."
+                        android:text="Bad Air Quality"
                         android:textColor="@color/colorTextPrimaryBad"
                         android:textSize="18sp" />
 
@@ -148,7 +157,7 @@
                         android:layout_gravity="center"
                         android:background="@null"
                         android:scaleType="fitXY"
-                        android:src="@drawable/ic_dunno" />
+                        android:src="@drawable/ic_severe" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -168,7 +177,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text=" 22 Minutes ago "
+                            android:text=" 2 Minutes ago "
                             android:textColor="@color/colorTextBlack" />
 
 
@@ -181,15 +190,19 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="4dp"
                         android:clickable="true"
-                        android:elevation="6dp"
+                        android:elevation="8dp"
+                        app:cardCornerRadius="4dp"
                         android:foreground="?android:attr/selectableItemBackground"
                         tools:targetApi="lollipop">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="50dp"
-                            android:orientation="horizontal">
-
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
                             <ImageView
                                 android:layout_width="40dp"
                                 android:layout_height="40dp"
@@ -211,8 +224,19 @@
                                 android:scaleType="fitXY"
                                 android:text="@string/fetching_location"
                                 android:textAlignment="textStart"
-                                android:textSize="21sp"
+                                android:textSize="19sp"
                                 tools:ignore="RtlCompat" />
+
+
+                            </LinearLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="250dp"
+                                android:layout_gravity="center"
+                                android:background="@null"
+                                android:padding="4dp"
+                                android:scaleType="fitXY"
+                                android:src="@drawable/delhimap" />
                         </LinearLayout>
                     </android.support.v7.widget.CardView>
 
@@ -727,7 +751,7 @@
                         android:text="History"
                         android:textSize="16sp" />
 
-                    <com.github.mikephil.charting.charts.BarChart
+                    <com.github.mikephil.charting.charts.RadarChart
                         android:id="@+id/chart"
                         android:layout_width="match_parent"
                         android:layout_height="300dp" />

@@ -17,8 +17,8 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            app:indicatorColor="@color/cyan_color"
-            app:indicatorName="BallClipRotateMultipleIndicator" />
+            app:indicatorColor="@color/colorTextPrimaryGood"
+            app:indicatorName="BallGridPulseIndicator" />
     </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>
