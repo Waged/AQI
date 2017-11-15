@@ -2,7 +2,6 @@ package in.purelogic.aqi;
 
 
 import android.support.annotation.DrawableRes;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -65,7 +64,7 @@ public class OutdoorDataModel {
         this.mHumidity = mHumidity;
         this.mPm25 = mPm25;
         this.mTimeStamp = mTimeStamp;
-        this.mAqiDrawable = mPalette.getAqiDrawable(mPalette.getConditionAqi(this.mAqi));
+        this.mAqiDrawable  = mPalette.getAqiDrawable(mPalette.getConditionAqi(this.mAqi));
         this.mPm25Drawable = mPalette.getPm25Drawable(mPalette.getConditionPm25(this.mPm25));
     }
 
@@ -75,7 +74,6 @@ public class OutdoorDataModel {
     public static OutdoorDataModel fromJson(JSONObject jsonObject) {
         OutdoorDataModel outdoorDataModel = new OutdoorDataModel();
         try {
-
             outdoorDataModel.mAqi = jsonObject.getInt("aqi");
             outdoorDataModel.mPm25 = jsonObject.getInt("pm25");
             outdoorDataModel.mTemperature = jsonObject.getDouble("temp");
@@ -83,7 +81,6 @@ public class OutdoorDataModel {
             outdoorDataModel.mTimeStamp = jsonObject.getString("time");
             outdoorDataModel.mAqiDrawable = mPalette.getAqiDrawable(mPalette.getConditionAqi(outdoorDataModel.mAqi));
             outdoorDataModel.mPm25Drawable = mPalette.getPm25Drawable(mPalette.getConditionPm25(outdoorDataModel.getmPm25()));
-
         } catch (JSONException e) {
             e.printStackTrace();
             return null;

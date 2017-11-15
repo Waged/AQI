@@ -44,6 +44,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
 import com.wang.avi.AVLoadingIndicatorView;
@@ -71,6 +72,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener ,LocationListener{
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
+    final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
+    final static String KEY= "kbLpQXHgWm7PkczZM";
 
     public static final String outdoorPrefs = "outdoorPrefs" ;
     public static final String placeName = "placename";
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity
     public static final String message = "message";
 
     SharedPreferences outdoorSharedpreferences;
-    private static String SENSOR_OUTDOOR_URL = "aqi.in/outdoor";
+
     String myPlaceNow;
     String myPlaceNowSmall;
 
@@ -307,13 +310,22 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onLocationChanged(Location location) {
-                Log.e("onLocationChanged", "called");
+                Log.d("onLocationChanged", "called");
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
+
+                String latReq = Double.toString(latitude);
+                String lonReq = Double.toString(longitude);
+
                 Log.e("onLocationChanged", "Latitude =" + latitude + " longitude =" + longitude);
                 if (latitude != 0.0 && longitude != 0.0) {
                     Log.e("location","location Achieved");
                     new FindMe(MainActivity.this).execute();
+                    RequestParams params = new RequestParams();
+                    params.put("lat", latReq);
+                    params.put("lon", lonReq);
+                    params.put("key", KEY);
+                    letsDoSomeNetworkingOutdoor(params);
                 }
             }
             @Override
@@ -440,7 +452,7 @@ public class MainActivity extends AppCompatActivity
                 getWeatherForCurrentLocation();
                 Log.e("getWeatherForCurrentLoc","Called from onRequest");
             } else {
-                Log.d("clima", "OnRequestPermission:permission Failed");
+                Log.d("aqi", "OnRequestPermission:permission Failed");
                 // Toasty.error(this, "App needs Permision to fetch AQI", Toast.LENGTH_SHORT).show();
                  //tvCurrentLocation.setText("Enable Permission");
                 // tvPlace.setText("GPS Off");
@@ -527,7 +539,7 @@ public class MainActivity extends AppCompatActivity
        // mDrawer.closeMenu();
         web.setData(Uri.parse(url));
         startActivity(web);
-        
+
 
     }
 
@@ -659,33 +671,41 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(MainActivity.this, "Already have The latest Data", Toast.LENGTH_SHORT).show();
     }
 
-    private void letsDoSomeNetworkingOutdoor() {
+
+
+
+    private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
         avi.show();
+
         AsyncHttpClient client = new AsyncHttpClient();
-        client.post(SENSOR_OUTDOOR_URL, new JsonHttpResponseHandler() {
+        client.get(SENSOR_OUTDOOR_URL,requestParams, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
-                OutdoorDataModel outdoorData = OutdoorDataModel.fromJson(response);
-                Log.d("climaX", "Fail" + response.toString());
-                if (outdoorData == null || outdoorData.getmPm25() == 0) {
-                    getSavedValues();
+               OutdoorDataModel outdoorData = OutdoorDataModel.fromJson(response);
+                if(response!=null) {
+                    Log.d("json ", "success : " + response.toString());
+                }
+               //if (outdoorData == null || outdoorData.getmPm25() == 0) {
+                   // getSavedValues();
                     avi.setVisibility(View.INVISIBLE);
                     return;
-                }
-                boolean saved = saveOutdoorValues(outdoorData);
-                if(saved){
-                    updateOutdoorUi(outdoorData);
-                }
-                avi.setVisibility(View.INVISIBLE);
+               // }
+               // boolean saved = saveOutdoorValues(outdoorData);
+               // if(saved){
+               //     updateOutdoorUi(outdoorData);
+               // }
+              //  avi.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                 super.onFailure(statusCode, headers, e, errorResponse);
-                getSavedValues();
+                //getSavedValues();
                 avi.setVisibility(View.INVISIBLE);
-
+                if(errorResponse!=null) {
+                    Log.d("json ", "failed : " + errorResponse.toString());
+                }
             }
         });
     }
