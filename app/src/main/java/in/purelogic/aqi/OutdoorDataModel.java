@@ -74,6 +74,7 @@ public class OutdoorDataModel {
     public static OutdoorDataModel fromJson(JSONObject jsonObject) {
         OutdoorDataModel outdoorDataModel = new OutdoorDataModel();
         try {
+
             outdoorDataModel.mAqi = jsonObject.getInt("aqi");
             outdoorDataModel.mPm25 = jsonObject.getInt("pm25");
             outdoorDataModel.mTemperature = jsonObject.getDouble("temp");
