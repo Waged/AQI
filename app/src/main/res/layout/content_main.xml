@@ -45,6 +45,8 @@
                         android:textColor="@color/colorTextPrimaryGood"
                         android:textSize="18sp" />
 
+
+
                     <TextView
                         android:id="@+id/tvPlace"
                         android:layout_width="match_parent"
