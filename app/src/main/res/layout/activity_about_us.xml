@@ -44,16 +44,6 @@
         android:text="@string/about_us_txt1" />
 
 
-
-
-
-
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/creativeteam" />
-
         <TextView
             android:id="@+id/about_us_sub_title2"
             android:paddingTop="10dp"

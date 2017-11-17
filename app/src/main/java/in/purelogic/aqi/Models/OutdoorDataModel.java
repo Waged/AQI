@@ -1,9 +1,10 @@
-package in.purelogic.aqi;
+package in.purelogic.aqi.Models;
 
 
-import android.support.annotation.DrawableRes;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import in.purelogic.aqi.Palette;
 
 public class OutdoorDataModel {
 

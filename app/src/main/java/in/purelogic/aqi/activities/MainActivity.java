@@ -35,17 +35,14 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.github.mikephil.charting.charts.BarChart;
+
 import com.github.mikephil.charting.charts.RadarChart;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -62,24 +59,26 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cz.msebera.android.httpclient.Header;
 import es.dmoral.toasty.Toasty;
-import in.purelogic.aqi.OutdoorDataModel;
+import in.purelogic.aqi.Models.OutdoorDataModel;
 import in.purelogic.aqi.Palette;
 import in.purelogic.aqi.R;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener ,LocationListener{
+        implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
-    final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
-    final static String KEY= "kbLpQXHgWm7PkczZM";
-
-    public static final String outdoorPrefs = "outdoorPrefs" ;
+    //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
+   // final static String KEY = "kbLpQXHgWm7PkczZM";
+    final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
+    final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
+    public static final String outdoorPrefs = "outdoorPrefs";
     public static final String placeName = "placename";
     public static final String aqi = "aqi";
     public static final String pm25 = "pm25";
@@ -95,7 +94,6 @@ public class MainActivity extends AppCompatActivity
 
     String myPlaceNow;
     String myPlaceNowSmall;
-
 
     @BindView(R.id.drawer_layout)
     FlowingDrawer mDrawer;
@@ -135,6 +133,9 @@ public class MainActivity extends AppCompatActivity
     AVLoadingIndicatorView avi;
     @BindView(R.id.chart)
     RadarChart chart;
+    @BindView(R.id.ivMenu)
+    ImageView ivMenu;
+
     Animation fade;
     MediaPlayer mp;
 
@@ -161,19 +162,19 @@ public class MainActivity extends AppCompatActivity
         Log.e("onStart", "Called");
     }
 
-    private void CheckOldAndroidVersion(){
+    private void CheckOldAndroidVersion() {
         if (android.os.Build.VERSION.SDK_INT <= 22) {
             Log.e("sdkLess22", " right");
             LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             try {
                 gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                Log.d("gps","status: "+gps_enabled);
+                Log.d("gps", "status: " + gps_enabled);
             } catch (Exception ex) {
                 Log.e("gps", ex.toString());
             }
             try {
                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                Log.d("network","status: "+gps_enabled);
+                Log.d("network", "status: " + gps_enabled);
             } catch (Exception ex) {
                 Log.e("network", ex.toString());
             }
@@ -200,8 +201,8 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         Log.e("onResume", "Called");
         CheckOldAndroidVersion();
-        getWeatherForCurrentLocation();
-        Log.e("getWeatherForCurrentLoc","Called from onResume");
+        getAqiForCurrentLocation();
+        Log.e("getWeatherForCurrentLoc", "Called from onResume");
     }
 
     @Override
@@ -209,59 +210,57 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-            //ToDo: for the sake of the Radar
-            //******************************************
+        //ToDo: for the sake of the Radar
+        //******************************************
         //************************************************************
         //************************************************************
         ArrayList<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(40f, 0));
-        entries.add(new Entry(50f, 1));
-        entries.add(new Entry(20f, 2));
-        entries.add(new Entry(70f, 3));
-        entries.add(new Entry(60f, 4));
-        entries.add(new Entry(50f, 5));
+        entries.add(new Entry(140, 0));
+        entries.add(new Entry(250, 1));
+        entries.add(new Entry(320, 2));
+        entries.add(new Entry(470, 3));
+        entries.add(new Entry(360, 4));
 
-        ArrayList<Entry> entries2 = new ArrayList<>();
-        entries2.add(new Entry(10f, 0));
-        entries2.add(new Entry(50f, 1));
-        entries2.add(new Entry(60f, 2));
-        entries2.add(new Entry(30f, 3));
-        entries2.add(new Entry(40f, 4));
-        entries2.add(new Entry(80f, 5));
+
+       // ArrayList<Entry> entries2 = new ArrayList<>();
+      //  entries2.add(new Entry(10, 0));
+      //  entries2.add(new Entry(50, 1));
+      //  entries2.add(new Entry(60, 2));
+      //  entries2.add(new Entry(30, 3));
+      //  entries2.add(new Entry(40, 4));
+      //  entries2.add(new Entry(80, 5));
 
         RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Today's Reading");
 
-        RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
+      //  RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
 
-        dataset_comp1.setColor(Color.CYAN);
+        dataset_comp1.setColor(Color.RED);
         dataset_comp1.setDrawFilled(true);
 
-        dataset_comp2.setColor(Color.RED);
-        dataset_comp2.setDrawFilled(true);
+     //   dataset_comp2.setColor(Color.RED);
+      //  dataset_comp2.setDrawFilled(true);
 
 
         ArrayList<RadarDataSet> dataSets = new ArrayList<RadarDataSet>();
         dataSets.add(dataset_comp1);
-        dataSets.add(dataset_comp2);
+       // dataSets.add(dataset_comp2);
 
         ArrayList<String> labels = new ArrayList<String>();
-        labels.add("PM10");
-        labels.add("PM2.5");
-        labels.add("Air Quality");
-        labels.add("Ozone");
-        labels.add("HCHO");
-        labels.add("CO2");
+        labels.add("JUL");
+        labels.add("SEP");
+        labels.add("OCT");
+        labels.add("NOV");
+        labels.add("DEC");
 
         RadarData data = new RadarData(labels, dataSets);
         chart.setData(data);
         //String description = "Pollutants highest Components";
-      //  chart.setDescription(description);
-        chart.setWebLineWidthInner(0.5f);
+        //  chart.setDescription(description);
+        chart.setWebLineWidthInner(1);
         //chart.setDescriptionColor(Color.RED);
         //chart.setSkipWebLineCount(10);
         chart.invalidate();
         chart.animate();
-
 
         //************************************************************
         //*********************Chart Ended Here***************************************
@@ -308,6 +307,7 @@ public class MainActivity extends AppCompatActivity
                     //   Toast.makeText(MainActivity.this, "onDrawerStateChange ", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onDrawerSlide(float openRatio, int offsetPixels) {
                 // Log.i("MainActivity", "openRatio=" + openRatio + " ,offsetPixels=" + offsetPixels);
@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         mPullToRefreshView.setRefreshing(false);
                         Toast.makeText(MainActivity.this, "Refreshing..", Toast.LENGTH_SHORT).show();
-                        getWeatherForCurrentLocation();
+                        getAqiForCurrentLocation();
                         Date date = Calendar.getInstance().getTime();
                         String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
                         String day = (String) DateFormat.format("dd", date); // 20
@@ -335,8 +335,6 @@ public class MainActivity extends AppCompatActivity
                 }, 900);
             }
         });
-
-
 
 
     }
@@ -353,12 +351,10 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
-    // TODO: Add getWeatherForCurrentLocation() here:
-    private void getWeatherForCurrentLocation() {
+    // TODO: Add getAqiForCurrentLocation() here:
+    private void getAqiForCurrentLocation() {
         avi.show();
-        Log.e("getWeather", "Called");
+        Log.e("getAQI", "Called");
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
 
@@ -373,19 +369,22 @@ public class MainActivity extends AppCompatActivity
 
                 Log.e("onLocationChanged", "Latitude =" + latitude + " longitude =" + longitude);
                 if (latitude != 0.0 && longitude != 0.0) {
-                    Log.e("location","location Achieved");
+                    Log.e("location", "location Achieved");
                     new FindMe(MainActivity.this).execute();
                     RequestParams params = new RequestParams();
                     params.put("lat", latReq);
                     params.put("lon", lonReq);
-                    params.put("key", KEY);
+                   // params.put("key", KEY);
+                    params.put("APPID", APPID);
                     letsDoSomeNetworkingOutdoor(params);
                 }
             }
+
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
 
             }
+
             @Override
             public void onProviderEnabled(String provider) {
 
@@ -411,8 +410,8 @@ public class MainActivity extends AppCompatActivity
     //TODO: Location Listeners
     @Override
     public void onLocationChanged(Location location) {
-       //double lat =  location.getLatitude();
-      // double lng = location.getLongitude();
+        //double lat =  location.getLatitude();
+        // double lng = location.getLongitude();
         /*
         SharedPreferences.Editor editor = locationSharedPreferences.edit();
         editor.putString(latPrefs, lat+"");
@@ -420,7 +419,7 @@ public class MainActivity extends AppCompatActivity
         //editor.putString(aqiPrefs, e);
         editor.commit();
         */
-        Log.e("onLocationChanged","Called");
+        Log.e("onLocationChanged", "Called");
     }
 
     @Override
@@ -441,40 +440,42 @@ public class MainActivity extends AppCompatActivity
     //TODO: AsyncTask to fetch user location
     private class FindMe extends AsyncTask<Void, Void, String> {
         private Context appContext;
+
         private FindMe(Context appContext) {
             this.appContext = appContext;
         }
+
         @Override
         protected String doInBackground(Void... voids) {
             Log.e("doInBackground", "Called");
             Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
-            List<Address> addresses ;
+            List<Address> addresses;
 
             try {
                 addresses = geocoder.getFromLocation(latitude, longitude, 1);
                 if (addresses != null && addresses.size() > 0) {
                     Log.e("Adress", addresses.toString());
                     Address address = addresses.get(0);
-                   // String cityName = address.getAddressLine(0);
+                    // String cityName = address.getAddressLine(0);
                     StringBuilder strReturnedAddress = new StringBuilder("");
 
                     for (int i = 0; i <= 2; i++) {
                         strReturnedAddress.append(address.getAddressLine(i)).append(",");
                     }
                     String strAdd = strReturnedAddress.toString();
-                   // String state = addresses.get(0).getAdminArea();
+                    // String state = addresses.get(0).getAdminArea();
                     String city = addresses.get(0).getLocality();
                     String country = addresses.get(0).getCountryName();
                     String knownName = addresses.get(0).getFeatureName();
-                  //  String full = address.getAddressLine(0);
+                    //  String full = address.getAddressLine(0);
                     Log.e("cityName", city);
                     // tvPlace.setText(cityName+" "+stateName);
                     if (knownName != null) {
-                         myPlaceNow = knownName + ", " + city + ", " + country;
-                         myPlaceNowSmall =knownName + ", " + city;
-                        if(myPlaceNow.length() > 33){
+                        myPlaceNow = knownName + ", " + city + ", " + country;
+                        myPlaceNowSmall = knownName + ", " + city;
+                        if (myPlaceNow.length() > 33) {
                             return myPlaceNowSmall.trim();
-                        }else{
+                        } else {
                             return myPlaceNow.trim();
                         }
 
@@ -488,6 +489,7 @@ public class MainActivity extends AppCompatActivity
             }
             return null;
         }
+
         protected void onPostExecute(String result) {
             tvPlace.setText(result);
             tvCurrentLocation.setText(result);
@@ -503,12 +505,12 @@ public class MainActivity extends AppCompatActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getWeatherForCurrentLocation();
-                Log.e("getWeatherForCurrentLoc","Called from onRequest");
+                getAqiForCurrentLocation();
+                Log.e("getWeatherForCurrentLoc", "Called from onRequest");
             } else {
                 Log.d("aqi", "OnRequestPermission:permission Failed");
                 // Toasty.error(this, "App needs Permision to fetch AQI", Toast.LENGTH_SHORT).show();
-                 //tvCurrentLocation.setText("Enable Permission");
+                //tvCurrentLocation.setText("Enable Permission");
                 // tvPlace.setText("GPS Off");
             }
         }
@@ -573,12 +575,12 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.btnBlog)
     void blogBtn() {
-       // btnBlog.setAnimation(fade);
+        // btnBlog.setAnimation(fade);
         Toasty.info(MainActivity.this, "Blog Redirecting .. ", Toast.LENGTH_SHORT, false).show();
         Intent blog = new Intent(MainActivity.this, Blog.class);
         startActivity(blog);
         mp.start();
-       // mDrawer.closeMenu();
+        // mDrawer.closeMenu();
     }
 
     @OnClick(R.id.btnWebsite)
@@ -590,7 +592,7 @@ public class MainActivity extends AppCompatActivity
         //btnWebsite.setAnimation(fade);
         String url = "http://aqi.in/";
         Intent web = new Intent(Intent.ACTION_VIEW);
-       // mDrawer.closeMenu();
+        // mDrawer.closeMenu();
         web.setData(Uri.parse(url));
         startActivity(web);
 
@@ -602,7 +604,7 @@ public class MainActivity extends AppCompatActivity
         mp.start();
         //btnAboutUs.startAnimation(fade);
         Intent aboutUs = new Intent(MainActivity.this, AboutUs.class);
-      //  mDrawer.closeMenu();
+        //  mDrawer.closeMenu();
         startActivity(aboutUs);
     }
 
@@ -610,20 +612,28 @@ public class MainActivity extends AppCompatActivity
     void facebookBtn() {
         mp.start();
         //btnFacebook.setAnimation(fade);
-       // mDrawer.closeMenu();
+        // mDrawer.closeMenu();
         Toasty.info(MainActivity.this, "Facebook Redirecting", Toast.LENGTH_SHORT).show();
         startActivity(newFacebookIntent(getPackageManager(), url));
     }
 
+    @OnClick(R.id.ivMenu)
+    void openMenu(View v){
+        if(!mDrawer.isActivated()) {
+            ivMenu.setAnimation(fade);
+            mDrawer.openMenu();
+        }
+
+    }
 
     @OnClick(R.id.myCardView)
-    void goToMaps () {
+    void goToMaps() {
         Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);
-        if(latitude !=0 && longitude!=0){
-        mapIntent.putExtra("latitude",latitude);
-        mapIntent.putExtra("longitude",longitude);
-        mapIntent.putExtra("aqi","22");
-        mapIntent.putExtra("location",myPlaceNow);
+        if (latitude != 0 && longitude != 0) {
+            mapIntent.putExtra("latitude", latitude);
+            mapIntent.putExtra("longitude", longitude);
+            mapIntent.putExtra("aqi", "22");
+            mapIntent.putExtra("location", myPlaceNow);
         }
         startActivity(mapIntent);
     }
@@ -644,44 +654,42 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-//Todo onNoNeedGettingDataFromServer
+    //Todo onNoNeedGettingDataFromServer
     private void getSavedValues() {
-        String mPlaceName = outdoorSharedpreferences.getString(placeName,"NA");
-        int mAqi= outdoorSharedpreferences.getInt(aqi,0);
-        int mPm25= outdoorSharedpreferences.getInt(pm25,0);
-        double mTemperature = outdoorSharedpreferences.getFloat(temp,0.0f);
-        int mHumidity= outdoorSharedpreferences.getInt(humid,0);
-        String mTime = outdoorSharedpreferences.getString(time,"NA");
-        OutdoorDataModel outdoorData = new OutdoorDataModel(mPlaceName,mAqi,mPm25,mTemperature,mHumidity,mTime);
+        String mPlaceName = outdoorSharedpreferences.getString(placeName, "NA");
+        int mAqi = outdoorSharedpreferences.getInt(aqi, 0);
+        int mPm25 = outdoorSharedpreferences.getInt(pm25, 0);
+        double mTemperature = outdoorSharedpreferences.getFloat(temp, 0.0f);
+        int mHumidity = outdoorSharedpreferences.getInt(humid, 0);
+        String mTime = outdoorSharedpreferences.getString(time, "NA");
+        OutdoorDataModel outdoorData = new OutdoorDataModel(mPlaceName, mAqi, mPm25, mTemperature, mHumidity, mTime);
         updateOutdoorUi(outdoorData);
         Toast.makeText(MainActivity.this, "Already have The latest Data", Toast.LENGTH_SHORT).show();
     }
-
-
 
 
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
         avi.show();
 
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get(SENSOR_OUTDOOR_URL,requestParams, new JsonHttpResponseHandler() {
+        client.get(SENSOR_OUTDOOR_URL, requestParams, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
-               OutdoorDataModel outdoorData = OutdoorDataModel.fromJson(response);
-                if(response!=null) {
+               // OutdoorDataModel outdoorData = OutdoorDataModel.fromJson(response);
+                if (response != null) {
                     Log.d("json ", "success : " + response.toString());
                 }
-               //if (outdoorData == null || outdoorData.getmPm25() == 0) {
-                   // getSavedValues();
-                    avi.setVisibility(View.INVISIBLE);
-                    return;
-               // }
-               // boolean saved = saveOutdoorValues(outdoorData);
-               // if(saved){
-               //     updateOutdoorUi(outdoorData);
-               // }
-              //  avi.setVisibility(View.INVISIBLE);
+                //if (outdoorData == null || outdoorData.getmPm25() == 0) {
+                // getSavedValues();
+                avi.setVisibility(View.INVISIBLE);
+                return;
+                // }
+                // boolean saved = saveOutdoorValues(outdoorData);
+                // if(saved){
+                //     updateOutdoorUi(outdoorData);
+                // }
+                //  avi.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -689,7 +697,7 @@ public class MainActivity extends AppCompatActivity
                 super.onFailure(statusCode, headers, e, errorResponse);
                 //getSavedValues();
                 avi.setVisibility(View.INVISIBLE);
-                if(errorResponse!=null) {
+                if (errorResponse != null) {
                     Log.d("json ", "failed : " + errorResponse.toString());
                 }
             }
@@ -698,26 +706,26 @@ public class MainActivity extends AppCompatActivity
 
     private boolean saveOutdoorValues(OutdoorDataModel outdoorData) {
         SharedPreferences.Editor editor = outdoorSharedpreferences.edit();
-        editor.putString(placeName,outdoorData.getmPlaceName());
-        editor.putInt(aqi,outdoorData.getmAqi());
-        editor.putInt(pm25,outdoorData.getmPm25() );
-        editor.putFloat(temp,(float)outdoorData.getmTemperature() );
-        editor.putInt(humid,outdoorData.getmHumidity() );
-        editor.putString(time,outdoorData.getmTimeStamp());
+        editor.putString(placeName, outdoorData.getmPlaceName());
+        editor.putInt(aqi, outdoorData.getmAqi());
+        editor.putInt(pm25, outdoorData.getmPm25());
+        editor.putFloat(temp, (float) outdoorData.getmTemperature());
+        editor.putInt(humid, outdoorData.getmHumidity());
+        editor.putString(time, outdoorData.getmTimeStamp());
         return editor.commit();
     }
 
     private void updateOutdoorUi(OutdoorDataModel outdoorData) {
         Palette palette = new Palette();
-       // outdoorCardView.setBackgroundColor(palette.getTxtColor(this, palette.getConditionAqi(outdoorData.getmAqi())));
-      //  outdoorCardText.setText(palette.getConditionString(outdoorData.getmAqi()));
-      //  ivPm25SignOutdoor.setImageResource(outdoorData.getmPm25Drawable());
-      //  outdoorMeter.speedTo(outdoorData.getmAqi(), 1000);
-      //  tvOutdoorPM25.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmPm25()));
-      //  tvOutdoorPM25.setTextColor(palette.getTxtColor(this, palette.getConditionPm25(outdoorData.getmPm25())));
-      //  tvOutdoorTemp.setText(String.format(Locale.getDefault(), "%1$,.1f", outdoorData.getmTemperature()));
-     //   tvOutdoorHumid.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmHumidity()));
-       // tvOutdoorTime.setText( outdoorData.getmTimeStamp());
+        // outdoorCardView.setBackgroundColor(palette.getTxtColor(this, palette.getConditionAqi(outdoorData.getmAqi())));
+        //  outdoorCardText.setText(palette.getConditionString(outdoorData.getmAqi()));
+        //  ivPm25SignOutdoor.setImageResource(outdoorData.getmPm25Drawable());
+        //  outdoorMeter.speedTo(outdoorData.getmAqi(), 1000);
+        //  tvOutdoorPM25.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmPm25()));
+        //  tvOutdoorPM25.setTextColor(palette.getTxtColor(this, palette.getConditionPm25(outdoorData.getmPm25())));
+        //  tvOutdoorTemp.setText(String.format(Locale.getDefault(), "%1$,.1f", outdoorData.getmTemperature()));
+        //   tvOutdoorHumid.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmHumidity()));
+        // tvOutdoorTime.setText( outdoorData.getmTimeStamp());
     }
 
     //For Menu to Override method
