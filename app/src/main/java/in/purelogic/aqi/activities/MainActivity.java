@@ -20,7 +20,10 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -65,8 +68,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cz.msebera.android.httpclient.Header;
 import es.dmoral.toasty.Toasty;
-import in.purelogic.aqi.Models.OutdoorDataModel;
-import in.purelogic.aqi.Palette;
+import in.purelogic.aqi.Models.AirVisualModel;
 import in.purelogic.aqi.R;
 
 
@@ -75,9 +77,15 @@ public class MainActivity extends AppCompatActivity
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
     //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
-   // final static String KEY = "kbLpQXHgWm7PkczZM";
-    final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
-    final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
+    // final static String KEY = "kbLpQXHgWm7PkczZM";
+
+    // final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
+    //  final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
+//"http://api.airvisual.com/v2/nearest_city?lat=35.98&lon=140.33&key={{YOUR_API_KEY}}";
+    final static String AIR_VISUAL_URL = "http://api.airvisual.com/v2/nearest_city?";
+    final static String KEY = "kbLpQXHgWm7PkczZM";
+    //  final static String OUR_URL = " https://api.aqi.in/locationData?";
+
     public static final String outdoorPrefs = "outdoorPrefs";
     public static final String placeName = "placename";
     public static final String aqi = "aqi";
@@ -85,16 +93,11 @@ public class MainActivity extends AppCompatActivity
     public static final String temp = "temp";
     public static final String humid = "humid";
     public static final String time = "time";
-    public static final String picture1 = "picture1";
-    public static final String picture2 = "picture2";
-    public static final String picture3 = "picture3";
     public static final String message = "message";
-
+    public boolean doubleBackToExitPressedOnce = false;
     SharedPreferences outdoorSharedpreferences;
-
     String myPlaceNow;
     String myPlaceNowSmall;
-
     @BindView(R.id.drawer_layout)
     FlowingDrawer mDrawer;
     @BindView(R.id.btnLocations)
@@ -135,6 +138,19 @@ public class MainActivity extends AppCompatActivity
     RadarChart chart;
     @BindView(R.id.ivMenu)
     ImageView ivMenu;
+
+    @BindView(R.id.weatherSymbol)
+    ImageView ivWeatherSymbol;
+
+    @BindView(R.id.ivAQICondition)
+    ImageView ivAQI;
+    @BindView(R.id.tempTV)
+    TextView tvTemp;
+    @BindView(R.id.tvHumidity)
+    TextView tvHumid;
+
+    @BindView(R.id.tvWindSpeed)
+    TextView tvWindSpeed;
 
     Animation fade;
     MediaPlayer mp;
@@ -222,28 +238,28 @@ public class MainActivity extends AppCompatActivity
         entries.add(new Entry(360, 4));
 
 
-       // ArrayList<Entry> entries2 = new ArrayList<>();
-      //  entries2.add(new Entry(10, 0));
-      //  entries2.add(new Entry(50, 1));
-      //  entries2.add(new Entry(60, 2));
-      //  entries2.add(new Entry(30, 3));
-      //  entries2.add(new Entry(40, 4));
-      //  entries2.add(new Entry(80, 5));
+        // ArrayList<Entry> entries2 = new ArrayList<>();
+        //  entries2.add(new Entry(10, 0));
+        //  entries2.add(new Entry(50, 1));
+        //  entries2.add(new Entry(60, 2));
+        //  entries2.add(new Entry(30, 3));
+        //  entries2.add(new Entry(40, 4));
+        //  entries2.add(new Entry(80, 5));
 
         RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Today's Reading");
 
-      //  RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
+        //  RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
 
         dataset_comp1.setColor(Color.RED);
         dataset_comp1.setDrawFilled(true);
 
-     //   dataset_comp2.setColor(Color.RED);
-      //  dataset_comp2.setDrawFilled(true);
+        //   dataset_comp2.setColor(Color.RED);
+        //  dataset_comp2.setDrawFilled(true);
 
 
         ArrayList<RadarDataSet> dataSets = new ArrayList<RadarDataSet>();
         dataSets.add(dataset_comp1);
-       // dataSets.add(dataset_comp2);
+        // dataSets.add(dataset_comp2);
 
         ArrayList<String> labels = new ArrayList<String>();
         labels.add("JUL");
@@ -254,8 +270,8 @@ public class MainActivity extends AppCompatActivity
 
         RadarData data = new RadarData(labels, dataSets);
         chart.setData(data);
-        //String description = "Pollutants highest Components";
-        //  chart.setDescription(description);
+        String description = "";
+        chart.setDescription(description);
         chart.setWebLineWidthInner(1);
         //chart.setDescriptionColor(Color.RED);
         //chart.setSkipWebLineCount(10);
@@ -265,8 +281,6 @@ public class MainActivity extends AppCompatActivity
         //************************************************************
         //*********************Chart Ended Here***************************************
         //************************************************************
-
-
         //TODO:Typeface for Texts
         //Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/moodyrock.ttf");
         //   Typeface tf2 = Typeface.createFromAsset(getAssets(),"fonts/arizona.ttf");
@@ -341,13 +355,20 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (mDrawer.isActivated()) {
-            Toasty.info(MainActivity.this, "drawer is activated", Toast.LENGTH_SHORT, false).show();
-            mDrawer.closeMenu(true);
-        } else {
+        if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
-            Toasty.error(MainActivity.this, "Closed", Toast.LENGTH_SHORT, false).show();
+            return;
         }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
 
 
@@ -370,12 +391,12 @@ public class MainActivity extends AppCompatActivity
                 Log.e("onLocationChanged", "Latitude =" + latitude + " longitude =" + longitude);
                 if (latitude != 0.0 && longitude != 0.0) {
                     Log.e("location", "location Achieved");
-                    new FindMe(MainActivity.this).execute();
                     RequestParams params = new RequestParams();
                     params.put("lat", latReq);
                     params.put("lon", lonReq);
-                   // params.put("key", KEY);
-                    params.put("APPID", APPID);
+                    params.put("key", KEY);
+                    new FindMe(MainActivity.this).execute();
+                    //  params.put("APPID", APPID);
                     letsDoSomeNetworkingOutdoor(params);
                 }
             }
@@ -618,8 +639,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @OnClick(R.id.ivMenu)
-    void openMenu(View v){
-        if(!mDrawer.isActivated()) {
+    void openMenu(View v) {
+        if (!mDrawer.isActivated()) {
             ivMenu.setAnimation(fade);
             mDrawer.openMenu();
         }
@@ -662,34 +683,28 @@ public class MainActivity extends AppCompatActivity
         double mTemperature = outdoorSharedpreferences.getFloat(temp, 0.0f);
         int mHumidity = outdoorSharedpreferences.getInt(humid, 0);
         String mTime = outdoorSharedpreferences.getString(time, "NA");
-        OutdoorDataModel outdoorData = new OutdoorDataModel(mPlaceName, mAqi, mPm25, mTemperature, mHumidity, mTime);
-        updateOutdoorUi(outdoorData);
+        // OutdoorDataModel outdoorData = new OutdoorDataModel(mPlaceName, mAqi, mPm25, mTemperature, mHumidity, mTime);
+        //updateUI(outdoorData);
         Toast.makeText(MainActivity.this, "Already have The latest Data", Toast.LENGTH_SHORT).show();
     }
 
 
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
         avi.show();
-
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get(SENSOR_OUTDOOR_URL, requestParams, new JsonHttpResponseHandler() {
+        client.get(AIR_VISUAL_URL, requestParams, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
-               // OutdoorDataModel outdoorData = OutdoorDataModel.fromJson(response);
+                avi.setVisibility(View.INVISIBLE);
                 if (response != null) {
-                    Log.d("json ", "success : " + response.toString());
+                    Log.d("response", response.toString());
+                    AirVisualModel airVisualModel = AirVisualModel.fromJson(response);
+                    updateUI(airVisualModel);
                 }
-                //if (outdoorData == null || outdoorData.getmPm25() == 0) {
-                // getSavedValues();
+
                 avi.setVisibility(View.INVISIBLE);
                 return;
-                // }
-                // boolean saved = saveOutdoorValues(outdoorData);
-                // if(saved){
-                //     updateOutdoorUi(outdoorData);
-                // }
-                //  avi.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -704,29 +719,103 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private boolean saveOutdoorValues(OutdoorDataModel outdoorData) {
-        SharedPreferences.Editor editor = outdoorSharedpreferences.edit();
-        editor.putString(placeName, outdoorData.getmPlaceName());
-        editor.putInt(aqi, outdoorData.getmAqi());
-        editor.putInt(pm25, outdoorData.getmPm25());
-        editor.putFloat(temp, (float) outdoorData.getmTemperature());
-        editor.putInt(humid, outdoorData.getmHumidity());
-        editor.putString(time, outdoorData.getmTimeStamp());
-        return editor.commit();
+
+    private void updateUI(AirVisualModel airVisualModel) {
+
+        tvAqi.setText(String.valueOf(airVisualModel.getmAQI()));
+        tvAqi.setTextColor(getResources().getColor(setRelevantTxtColorAQI(airVisualModel.getmAQI())));
+        tvAqiComment.setText(setRelevantTxtAQI(airVisualModel.getmAQI()));
+        tvAqiComment.setTextColor(getResources().getColor(setRelevantTxtColorAQI(airVisualModel.getmAQI())));
+        ivAQI.setImageResource(setRelevantResAQI(airVisualModel.getmAQI()));
+        tvTemp.setText(String.valueOf(airVisualModel.getmTemperature()));
+        tvHumid.setText(String.valueOf(airVisualModel.getmHumidity()));
+        tvWindSpeed.setText(String.valueOf(airVisualModel.getmWindSpeed()));
+        ivWeatherSymbol.setImageResource(setRelevantResWeather(airVisualModel.getmIcon()));
+        Log.d("icon",airVisualModel.getmIcon());
     }
 
-    private void updateOutdoorUi(OutdoorDataModel outdoorData) {
-        Palette palette = new Palette();
-        // outdoorCardView.setBackgroundColor(palette.getTxtColor(this, palette.getConditionAqi(outdoorData.getmAqi())));
-        //  outdoorCardText.setText(palette.getConditionString(outdoorData.getmAqi()));
-        //  ivPm25SignOutdoor.setImageResource(outdoorData.getmPm25Drawable());
-        //  outdoorMeter.speedTo(outdoorData.getmAqi(), 1000);
-        //  tvOutdoorPM25.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmPm25()));
-        //  tvOutdoorPM25.setTextColor(palette.getTxtColor(this, palette.getConditionPm25(outdoorData.getmPm25())));
-        //  tvOutdoorTemp.setText(String.format(Locale.getDefault(), "%1$,.1f", outdoorData.getmTemperature()));
-        //   tvOutdoorHumid.setText(String.format(Locale.getDefault(), "%d", outdoorData.getmHumidity()));
-        // tvOutdoorTime.setText( outdoorData.getmTimeStamp());
+    private
+    @DrawableRes
+    int setRelevantResAQI(int aqi) {
+        if (aqi <= 50) {
+            return R.drawable.ic_good;
+        } else if (aqi > 50 && aqi < 100) {
+            return R.drawable.ic_moderate;
+        } else if (aqi > 100 && aqi < 200) {
+            return R.drawable.ic_bad;
+        } else if (aqi > 200) {
+            return R.drawable.ic_verybad;
+        }
+
+        return R.drawable.ic_dunno;
     }
+
+    private
+    @DrawableRes
+    int setRelevantResWeather(String icon) {
+        if (icon.equals("01d")) {
+            return R.drawable.sunny;
+        } else if (icon.equals("02d")){
+            return R.drawable.cloudy2;
+        }
+        else if (icon.equals("03d")) {
+            return R.drawable.fog;
+        }
+        else if (icon.equals("04d")) {
+            return R.drawable.overcast;
+        }
+        else if (icon.equals("09d")) {
+            return R.drawable.light_rain;
+        }
+        else if (icon.equals("13d")) {
+            return R.drawable.snow5;
+        }
+        else if (icon.equals("50d")) {
+            return R.drawable.fog;
+        }
+
+
+        return R.drawable.dunno;
+    }
+
+
+    private int setRelevantTxtColorAQI(int aqi) {
+        if (aqi <= 50) {
+            return R.color.good;
+        } else if (aqi > 50 && aqi < 100) {
+            return R.color.moderate;
+        } else if (aqi > 101 && aqi < 200) {
+            return R.color.unhealthy;
+        } else if (aqi > 200) {
+            return R.color.hazardous;
+        } else {
+            return R.color.colorBaseText;
+        }
+    }
+
+    private String setRelevantTxtAQI(int aqi) {
+        if (aqi <= 50) {
+            return getString(R.string.good);
+        } else if (aqi > 50 && aqi < 100) {
+            return getString(R.string.moderate);
+        } else if (aqi > 100 && aqi < 200) {
+            return getString(R.string.bad);
+        } else if (aqi > 200) {
+            return getString(R.string.veryBad);
+        } else {
+            return getString(R.string.checkConnection);
+        }
+    }
+    /* private boolean saveOutdoorValues(AirVisualModel airVisualModel) {
+        SharedPreferences.Editor editor = outdoorSharedpreferences.edit();
+        editor.putString(placeName, airVisualModel.getmPlaceName());
+        editor.putInt(aqi, airVisualModel.getmAqi());
+        editor.putInt(pm25, airVisualModel.getmPm25());
+        editor.putFloat(temp, (float) airVisualModel.getmTemperature());
+        editor.putInt(humid, airVisualModel.getmHumidity());
+        editor.putString(time, airVisualModel.getmTimeStamp());
+        return editor.commit();
+    }*/
 
     //For Menu to Override method
     @SuppressWarnings("StatementWithEmptyBody")

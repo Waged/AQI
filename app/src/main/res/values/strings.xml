@@ -20,5 +20,10 @@
         can be away from it or keep yourself safe from it. We, at AQI India want you to know WHAT
         YOU BREATHE. </string>
     <string name="fetching_location">Fetching Location...</string>
+    <string name="good">Good</string>
+    <string name="moderate">Moderate Air Quality</string>
+    <string name="bad">Bad Air Quality</string>
+    <string name="veryBad">Very Bad Air Quality</string>
+    <string name="checkConnection">Check Connection</string>
 
 </resources>
