@@ -748,6 +748,7 @@ public class MainActivity extends AppCompatActivity
         return R.drawable.ic_dunno;
     }
 
+
     private
     @DrawableRes
     int setRelevantResWeather(String icon) {
