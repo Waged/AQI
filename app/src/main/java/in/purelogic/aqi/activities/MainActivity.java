@@ -732,6 +732,7 @@ public class MainActivity extends AppCompatActivity
         hideMyDialog();
     }
 
+
     private
     @DrawableRes
     int setRelevantResAQI(int aqi) {
