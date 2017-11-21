@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     tools:context="in.purelogic.aqi.activities.MainActivity">
 
-    <FrameLayout
+  <!--  <FrameLayout-->
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <include layout="@layout/content_main" />
-
+<!--
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/avi"
             android:layout_width="50dp"
@@ -20,5 +20,5 @@
             app:indicatorColor="@color/colorTextPrimaryGood"
             app:indicatorName="BallGridPulseIndicator" />
     </FrameLayout>
-
+-->
 </android.support.design.widget.CoordinatorLayout>

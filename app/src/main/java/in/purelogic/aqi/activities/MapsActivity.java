@@ -2,6 +2,7 @@ package in.purelogic.aqi.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -23,6 +24,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -119,6 +122,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             tvLocation.setText(myLocation);
             LatLng myPlace = new LatLng(latitude, longitude);
             mMap.addMarker(new MarkerOptions().position(myPlace).title(myLocation).icon(icon).snippet("Current Location! "));
+
+            for(int rad=100;rad<=500;rad+=10) {
+                CircleOptions circleOptions = new CircleOptions()
+                        .center(new LatLng(latitude, longitude))   //set center
+                        .radius(rad)   //set radius in meters
+                        .fillColor(Color.TRANSPARENT)  //default
+                        .strokeColor(Color.RED)
+                        .strokeWidth(2);
+
+                Circle myCircle = googleMap.addCircle(circleOptions);
+            }
+
+            /*
+            mMap.addCircle(new CircleOptions()
+                    .center(new LatLng(latitude, longitude))
+                    .radius(2000)
+                    .strokeColor(Color.GREEN)
+                    .fillColor(Color.RED))
+                    ;
+*/
             mMap.moveCamera(CameraUpdateFactory.newLatLng(myPlace));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         }

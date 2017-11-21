@@ -2,6 +2,7 @@ package in.purelogic.aqi.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -78,7 +79,6 @@ public class MainActivity extends AppCompatActivity
     final String url = "https://www.facebook.com/aqiindia/";
     //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
     // final static String KEY = "kbLpQXHgWm7PkczZM";
-
     // final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
     //  final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
 //"http://api.airvisual.com/v2/nearest_city?lat=35.98&lon=140.33&key={{YOUR_API_KEY}}";
@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity
     public static final String time = "time";
     public static final String message = "message";
     public boolean doubleBackToExitPressedOnce = false;
+    public boolean isGeoFetchName = false;
     SharedPreferences outdoorSharedpreferences;
     String myPlaceNow;
     String myPlaceNowSmall;
@@ -104,8 +105,11 @@ public class MainActivity extends AppCompatActivity
     ImageButton btnLocation;
     @BindView(R.id.btnNotification)
     ImageButton btnNotify;
-    @BindView(R.id.btnWhatAqi)
-    ImageButton btnWhatAqi;
+  //  @BindView(R.id.btnWhatAqi)
+   // ImageButton btnWhatAqi;
+
+    @BindView(R.id.tvWhatToDo)
+    TextView tvWhatToDo;
     @BindView(R.id.btnBlog)
     ImageButton btnBlog;
     @BindView(R.id.btnWebsite)
@@ -132,42 +136,33 @@ public class MainActivity extends AppCompatActivity
     TextView tvCurrentLocation;
     @BindView(R.id.myCardView)
     CardView locationCard;
-    @BindView(R.id.avi)
-    AVLoadingIndicatorView avi;
+    // @BindView(R.id.avi)
+    // AVLoadingIndicatorView avi;
     @BindView(R.id.chart)
     RadarChart chart;
     @BindView(R.id.ivMenu)
     ImageView ivMenu;
-
     @BindView(R.id.weatherSymbol)
     ImageView ivWeatherSymbol;
-
     @BindView(R.id.ivAQICondition)
     ImageView ivAQI;
     @BindView(R.id.tempTV)
     TextView tvTemp;
     @BindView(R.id.tvHumidity)
     TextView tvHumid;
-
     @BindView(R.id.tvWindSpeed)
     TextView tvWindSpeed;
-
     Animation fade;
     MediaPlayer mp;
+    ProgressDialog dialog;
 
-
-    //SharedPreferences locationSharedPreferences;
-    // public static final String myLocationPrefs = "locationPrefs" ;
-    // public static final String latPrefs = "latitude";
-    //public static final String lngPrefs = "longitude";
-    // public static final String aqiPrefs = "aqiValue";
     // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mLocationManager;
     LocationListener mLocationListener;
     double latitude, longitude;
     String NETWORK_LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
-    final long MIN_TIME = 0;        // Time between location updates (5000 milliseconds or 5 seconds)
-    final float MIN_DISTANCE = 0;  // Distance between location updates (1000m or 1km)
+    final long MIN_TIME = 5000;        // Time between location updates (5000 milliseconds or 5 seconds)
+    final float MIN_DISTANCE = 100;  // Distance between location updates (1000m or 1km)
     public static boolean gps_enabled = false;
     public static boolean network_enabled = false;
     final int REQUEST_CODE = 1;
@@ -175,7 +170,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
+        CheckOldAndroidVersion();
+        getAqiForCurrentLocation();
         Log.e("onStart", "Called");
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("onResume", "Called");
+
     }
 
     private void CheckOldAndroidVersion() {
@@ -213,15 +218,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e("onResume", "Called");
-        CheckOldAndroidVersion();
-        getAqiForCurrentLocation();
-        Log.e("getWeatherForCurrentLoc", "Called from onResume");
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -236,8 +232,6 @@ public class MainActivity extends AppCompatActivity
         entries.add(new Entry(320, 2));
         entries.add(new Entry(470, 3));
         entries.add(new Entry(360, 4));
-
-
         // ArrayList<Entry> entries2 = new ArrayList<>();
         //  entries2.add(new Entry(10, 0));
         //  entries2.add(new Entry(50, 1));
@@ -245,29 +239,21 @@ public class MainActivity extends AppCompatActivity
         //  entries2.add(new Entry(30, 3));
         //  entries2.add(new Entry(40, 4));
         //  entries2.add(new Entry(80, 5));
-
         RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Today's Reading");
-
         //  RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
-
         dataset_comp1.setColor(Color.RED);
         dataset_comp1.setDrawFilled(true);
-
         //   dataset_comp2.setColor(Color.RED);
         //  dataset_comp2.setDrawFilled(true);
-
-
         ArrayList<RadarDataSet> dataSets = new ArrayList<RadarDataSet>();
         dataSets.add(dataset_comp1);
         // dataSets.add(dataset_comp2);
-
         ArrayList<String> labels = new ArrayList<String>();
         labels.add("JUL");
         labels.add("SEP");
         labels.add("OCT");
         labels.add("NOV");
         labels.add("DEC");
-
         RadarData data = new RadarData(labels, dataSets);
         chart.setData(data);
         String description = "";
@@ -277,7 +263,6 @@ public class MainActivity extends AppCompatActivity
         //chart.setSkipWebLineCount(10);
         chart.invalidate();
         chart.animate();
-
         //************************************************************
         //*********************Chart Ended Here***************************************
         //************************************************************
@@ -299,18 +284,17 @@ public class MainActivity extends AppCompatActivity
         tvAqiComment.setTypeface(tfRobotoBlackItalic);
         tvLastRefresh.setTypeface(tfRobotoBlackItalic);
         tvCurrentLocation.setTypeface(tfRobotoBold);
+        tvCurrentLocation.setBackgroundColor(Color.TRANSPARENT);
         tvCurrentLocation.setTextSize(18);
         tvCurrentLocation.setAnimation(fade);
         Date date = Calendar.getInstance().getTime();
         String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
         String day = (String) DateFormat.format("dd", date); // 20
         String monthString = (String) DateFormat.format("MMM", date); // Jun
-
         tvDate.setText(dayOfTheWeek + ", " + monthString + " " + day);
         locationCard.setCardBackgroundColor(Color.TRANSPARENT);
         locationCard.setCardElevation(4.0f);
         outdoorSharedpreferences = getSharedPreferences(outdoorPrefs, Context.MODE_PRIVATE);
-
         //Todo: Elastic Drawer to view Settings
         mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
         mDrawer.setOnDrawerStateChangeListener(new ElasticDrawer.OnDrawerStateChangeListener() {
@@ -374,7 +358,7 @@ public class MainActivity extends AppCompatActivity
 
     // TODO: Add getAqiForCurrentLocation() here:
     private void getAqiForCurrentLocation() {
-        avi.show();
+        // avi.show();
         Log.e("getAQI", "Called");
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
@@ -384,7 +368,6 @@ public class MainActivity extends AppCompatActivity
                 Log.d("onLocationChanged", "called");
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
-
                 String latReq = Double.toString(latitude);
                 String lonReq = Double.toString(longitude);
 
@@ -395,8 +378,10 @@ public class MainActivity extends AppCompatActivity
                     params.put("lat", latReq);
                     params.put("lon", lonReq);
                     params.put("key", KEY);
-                    new FindMe(MainActivity.this).execute();
-                    //  params.put("APPID", APPID);
+                    if(!isGeoFetchName) {
+                        new FindMe(MainActivity.this).execute();
+                    }
+                    //params.put("APPID", APPID);
                     letsDoSomeNetworkingOutdoor(params);
                 }
             }
@@ -431,15 +416,8 @@ public class MainActivity extends AppCompatActivity
     //TODO: Location Listeners
     @Override
     public void onLocationChanged(Location location) {
-        //double lat =  location.getLatitude();
-        // double lng = location.getLongitude();
-        /*
-        SharedPreferences.Editor editor = locationSharedPreferences.edit();
-        editor.putString(latPrefs, lat+"");
-        editor.putString(lngPrefs, lng+"");
-        //editor.putString(aqiPrefs, e);
-        editor.commit();
-        */
+
+        getAqiForCurrentLocation();
         Log.e("onLocationChanged", "Called");
     }
 
@@ -495,8 +473,11 @@ public class MainActivity extends AppCompatActivity
                         myPlaceNow = knownName + ", " + city + ", " + country;
                         myPlaceNowSmall = knownName + ", " + city;
                         if (myPlaceNow.length() > 33) {
+                            isGeoFetchName = true;
                             return myPlaceNowSmall.trim();
+
                         } else {
+                            isGeoFetchName = true;
                             return myPlaceNow.trim();
                         }
 
@@ -505,6 +486,7 @@ public class MainActivity extends AppCompatActivity
                     return strAdd;
                 }
             } catch (IOException e) {
+                isGeoFetchName = false;
                 e.printStackTrace();
                 return "Re-locating..";
             }
@@ -514,7 +496,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(String result) {
             tvPlace.setText(result);
             tvCurrentLocation.setText(result);
-            avi.hide();
+            // avi.hide();
         }
 
 
@@ -589,10 +571,10 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "btnNotification", Toast.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.btnWhatAqi)
-    void whatsAQIbtn() {
-        Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
-    }
+   // @OnClick(R.id.btnWhatAqi)
+    //void whatsAQIbtn() {
+     //   Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
+    //}
 
     @OnClick(R.id.btnBlog)
     void blogBtn() {
@@ -690,28 +672,32 @@ public class MainActivity extends AppCompatActivity
 
 
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
-        avi.show();
+        //  avi.show();
+        showMyDialog();
+
         AsyncHttpClient client = new AsyncHttpClient();
         client.get(AIR_VISUAL_URL, requestParams, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
-                avi.setVisibility(View.INVISIBLE);
+                //  avi.setVisibility(View.INVISIBLE);
+                hideMyDialog();
                 if (response != null) {
                     Log.d("response", response.toString());
                     AirVisualModel airVisualModel = AirVisualModel.fromJson(response);
                     updateUI(airVisualModel);
                 }
 
-                avi.setVisibility(View.INVISIBLE);
+                //  avi.setVisibility(View.INVISIBLE);
                 return;
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                 super.onFailure(statusCode, headers, e, errorResponse);
+                hideMyDialog();
                 //getSavedValues();
-                avi.setVisibility(View.INVISIBLE);
+                //  avi.setVisibility(View.INVISIBLE);
                 if (errorResponse != null) {
                     Log.d("json ", "failed : " + errorResponse.toString());
                 }
@@ -719,9 +705,20 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    private void showMyDialog() {
+        dialog = new ProgressDialog(this); // this = YourActivity
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage("Loading. Please wait...");
+        dialog.setIndeterminate(true);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+    }
+
+    private void hideMyDialog() {
+        dialog.hide();
+    }
 
     private void updateUI(AirVisualModel airVisualModel) {
-
         tvAqi.setText(String.valueOf(airVisualModel.getmAQI()));
         tvAqi.setTextColor(getResources().getColor(setRelevantTxtColorAQI(airVisualModel.getmAQI())));
         tvAqiComment.setText(setRelevantTxtAQI(airVisualModel.getmAQI()));
@@ -731,7 +728,8 @@ public class MainActivity extends AppCompatActivity
         tvHumid.setText(String.valueOf(airVisualModel.getmHumidity()));
         tvWindSpeed.setText(String.valueOf(airVisualModel.getmWindSpeed()));
         ivWeatherSymbol.setImageResource(setRelevantResWeather(airVisualModel.getmIcon()));
-        Log.d("icon",airVisualModel.getmIcon());
+        Log.d("icon", airVisualModel.getmIcon());
+        hideMyDialog();
     }
 
     private
@@ -744,9 +742,8 @@ public class MainActivity extends AppCompatActivity
         } else if (aqi > 100 && aqi < 200) {
             return R.drawable.ic_bad;
         } else if (aqi > 200) {
-            return R.drawable.ic_verybad;
+            return R.drawable.ic_severe;
         }
-
         return R.drawable.ic_dunno;
     }
 
@@ -754,24 +751,49 @@ public class MainActivity extends AppCompatActivity
     @DrawableRes
     int setRelevantResWeather(String icon) {
         if (icon.equals("01d")) {
-            return R.drawable.sunny;
-        } else if (icon.equals("02d")){
-            return R.drawable.cloudy2;
-        }
-        else if (icon.equals("03d")) {
-            return R.drawable.fog;
-        }
-        else if (icon.equals("04d")) {
-            return R.drawable.overcast;
-        }
-        else if (icon.equals("09d")) {
-            return R.drawable.light_rain;
-        }
-        else if (icon.equals("13d")) {
-            return R.drawable.snow5;
+            return R.drawable.w01d;
+        } else if (icon.equals("02d")) {
+            return R.drawable.w02d;
+        } else if (icon.equals("03d")) {
+            return R.drawable.w03d;
+        } else if (icon.equals("04d")) {
+            return R.drawable.w04d;
+        } else if (icon.equals("09d")) {
+            return R.drawable.w09d;
+        } else if (icon.equals("10d")) {
+            return R.drawable.w10d;
+        } else if (icon.equals("11d")) {
+            return R.drawable.w11d;
+        } else if (icon.equals("13d")) {
+            return R.drawable.w13d;
+        } else if (icon.equals("50d")) {
+            return R.drawable.w50d;
         }
         else if (icon.equals("50d")) {
-            return R.drawable.fog;
+            return R.drawable.w50d;
+        }
+        else if (icon.equals("01n")) {
+            return R.drawable.w01n;
+        }
+        else if (icon.equals("02n")) {
+            return R.drawable.w02n;
+        } else if (icon.equals("03n")) {
+            return R.drawable.w03n;
+        } else if (icon.equals("04n")) {
+            return R.drawable.w04n;
+        } else if (icon.equals("09n")) {
+            return R.drawable.w09n;
+        } else if (icon.equals("10n")) {
+            return R.drawable.w10n;
+        } else if (icon.equals("11n")) {
+            return R.drawable.w11n;
+        } else if (icon.equals("13n")) {
+            return R.drawable.w13n;
+        } else if (icon.equals("50n")) {
+            return R.drawable.w50n;
+        }
+        else if (icon.equals("50n")) {
+            return R.drawable.w50n;
         }
 
 
@@ -806,16 +828,21 @@ public class MainActivity extends AppCompatActivity
             return getString(R.string.checkConnection);
         }
     }
-    /* private boolean saveOutdoorValues(AirVisualModel airVisualModel) {
-        SharedPreferences.Editor editor = outdoorSharedpreferences.edit();
-        editor.putString(placeName, airVisualModel.getmPlaceName());
-        editor.putInt(aqi, airVisualModel.getmAqi());
-        editor.putInt(pm25, airVisualModel.getmPm25());
-        editor.putFloat(temp, (float) airVisualModel.getmTemperature());
-        editor.putInt(humid, airVisualModel.getmHumidity());
-        editor.putString(time, airVisualModel.getmTimeStamp());
-        return editor.commit();
-    }*/
+
+    private String setRelevantWhatToDo(int aqi){
+        if (aqi <= 50) {
+            return getString(R.string.doNothing);
+        } else if (aqi > 50 && aqi < 100) {
+            return getString(R.string.doModerate);
+        } else if (aqi > 100 && aqi < 200) {
+            return getString(R.string.doBad);
+        } else if (aqi > 200) {
+            return getString(R.string.doVeryBad);
+        } else {
+            return getString(R.string.checkConnection);
+        }
+    }
+
 
     //For Menu to Override method
     @SuppressWarnings("StatementWithEmptyBody")

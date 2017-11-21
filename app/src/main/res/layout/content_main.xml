@@ -5,7 +5,7 @@
     android:id="@+id/parentLinearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bckgrng1"
+    app:edMenuBackground="#ffffff"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     app:theme="@style/AppTheme"
     tools:context="in.purelogic.aqi.activities.MainActivity">
@@ -93,7 +93,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:layout_marginBottom="76dp"
+                        android:layout_marginBottom="20dp"
                         android:layout_marginTop="62dp">
 
                         <pl.droidsonroids.gif.GifImageView
@@ -302,28 +302,20 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
+                        android:layout_marginBottom="12dp"
                         android:orientation="horizontal">
 
-                        <pl.droidsonroids.gif.GifImageView
-                            android:layout_width="90dp"
-                            android:layout_height="100dp"
-
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
                             android:background="@null"
+                           android:layout_marginRight="8dp"
+                            android:layout_marginEnd="8dp"
                             android:foregroundGravity="center"
                             android:gravity="center"
-                            android:src="@drawable/windmil3" />
+                            android:src="@drawable/windmill" />
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="32dp"
-                                android:text="Direction "
-                                android:textColor="@color/colorPrimary" />
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -332,20 +324,7 @@
                                 android:text="Speed"
                                 android:textColor="@color/colorPrimary" />
 
-                        </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="8dp"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="32dp"
-                                android:text=" North-east " />
 
                             <TextView
                                 android:id="@+id/tvWindSpeed"
@@ -354,9 +333,16 @@
                                 android:layout_marginLeft="8dp"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginTop="4dp"
-                                android:text="NA km/h" />
+                                android:text="NA" />
 
-                        </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="4dp"
+                            android:text="km/h" />
+
 
 
                     </LinearLayout>
@@ -379,46 +365,38 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
-                            <LinearLayout
+                            <FrameLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
+                                android:layout_height="wrap_content">
 
                                 <ImageView
-                                    android:layout_width="40dp"
-                                    android:layout_height="40dp"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="300dp"
                                     android:layout_gravity="center"
                                     android:background="@null"
-                                    android:padding="4dp"
                                     android:scaleType="fitXY"
-                                    android:src="@drawable/mylocation" />
+                                    android:src="@drawable/delhimap" />
 
                                 <TextView
                                     android:id="@+id/tvCurrentLocation"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_gravity="bottom"
+                                    android:layout_gravity="center"
                                     android:layout_marginBottom="4dp"
                                     android:layout_marginRight="4dp"
-                                    android:gravity="bottom"
+                                    android:paddingLeft="4dp"
+                                    android:background="@color/cardview_light_background"
                                     android:maxLines="1"
-                                    android:scaleType="fitXY"
+                                    android:textAlignment="center"
+                                    android:textColor="@color/colorRed"
                                     android:text="@string/fetching_location"
-                                    android:textAlignment="textStart"
-                                    android:textSize="19sp"
-                                    tools:ignore="RtlCompat" />
+                                    android:textSize="20sp" />
 
 
-                            </LinearLayout>
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="250dp"
-                                android:layout_gravity="center"
-                                android:background="@null"
-                                android:padding="4dp"
-                                android:scaleType="fitXY"
-                                android:src="@drawable/delhimap" />
+                            </FrameLayout>
+
+
                         </LinearLayout>
                     </android.support.v7.widget.CardView>
 
@@ -954,6 +932,7 @@
                         android:textSize="22sp" />
 
                     <TextView
+                        android:id="@+id/tvWhatToDo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="......"
@@ -967,7 +946,7 @@
         <!--menu-->
         <com.mxn.soul.flowingdrawer_core.FlowingMenuLayout
             android:id="@+id/menulayout"
-            android:layout_width="39dp"
+            android:layout_width="29dp"
             android:layout_height="match_parent">
 
             <ScrollView
@@ -988,116 +967,134 @@
                         android:textColor="@color/colorAccent"
                         android:textStyle="bold" />
 
-                    <ImageButton
-                        android:id="@+id/btnLocations"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@null"
-                        android:elevation="4dp"
-                        android:src="@drawable/loc"
-                        tools:targetApi="lollipop" />
 
-                    <ImageButton
-                        android:id="@+id/btnNotification"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@null"
-                        android:elevation="4dp"
-                        android:src="@drawable/notify"
-                        tools:targetApi="lollipop" />
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:rowCount="2"
+                        android:columnCount="2"
+                        android:layout_height="match_parent">
 
-                    <ImageButton
-                        android:id="@+id/btnWhatAqi"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@null"
-                        android:elevation="4dp"
-                        android:src="@drawable/whatisaqi"
-                        tools:targetApi="lollipop" />
+                        <ImageButton
+                            android:id="@+id/btnNotification"
+                            android:src="@drawable/gridnotify"
+                            android:background="@null"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:scaleType="fitXY"
+                            android:layout_weight="1" />
 
-                    <ImageButton
-                        android:id="@+id/btnBlog"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@null"
-                        android:elevation="4dp"
-                        android:src="@drawable/blog"
-                        tools:targetApi="lollipop" />
+                        <ImageButton
+                            android:id="@+id/btnLocations"
+                            android:src="@drawable/gridloc"
+                            android:background="@null"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:scaleType="fitXY"
+                            android:layout_weight="1" />
+                        <TextView
+                            android:text="Notifications"
+                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@null"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
 
-                    <ImageButton
-                        android:id="@+id/btnWebsite"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@null"
-                        android:elevation="4dp"
-                        android:src="@drawable/website"
-                        tools:targetApi="lollipop" />
+                        <TextView
+                            android:text="  My Locations"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="center"
+                            android:background="@null"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
 
-                    <ImageButton
-                        android:id="@+id/btnAboutUs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="@null"
-                        android:elevation="4dp"
-                        android:src="@drawable/about"
-                        tools:targetApi="lollipop" />
+                        <ImageButton
+                            android:id="@+id/btnBlog"
+                            android:src="@drawable/gridblog"
+                            android:background="@null"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:scaleType="fitXY"
+                            android:layout_weight="1" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="20dp"
-                        android:text="Follow Us"
-                        android:textColor="@color/colorTextSecondaryBad"
-                        android:textSize="14sp" />
+                        <ImageButton
+                            android:id="@+id/btnWebsite"
+                            android:src="@drawable/gridwebsite"
+                            android:background="@null"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:scaleType="fitXY"
+                            android:layout_weight="1" />
+                        <TextView
+                            android:text="Our Blog"
+                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@null"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:text=" Visit Website"
+                            android:layout_gravity="center_vertical"
+                            android:gravity="center"
+                            android:background="@null"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <ImageButton
+                            android:id="@+id/btnAboutUs"
+                            android:src="@drawable/gridaboutus"
+                            android:background="@null"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:scaleType="fitXY"
+                            android:layout_weight="1" />
+
+                        <ImageButton
+                            android:background="@null"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:scaleType="fitXY"
+                            android:layout_weight="1" />
+                        <TextView
+                            android:text="About Us"
+                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_vertical"
+                            android:background="@null"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </GridLayout>
 
                     <LinearLayout
+                        android:layout_marginTop="12dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="8dp">
 
                         <ImageButton
                             android:id="@+id/btnFacebook"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginEnd="4dp"
-                            android:layout_marginRight="4dp"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginRight="8dp"
                             android:background="@null"
                             android:src="@drawable/facebookicon" />
 
                         <ImageButton
                             android:id="@+id/btnTwitter"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginEnd="4dp"
-                            android:layout_marginRight="4dp"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginRight="8dp"
                             android:background="@null"
                             android:src="@drawable/twittericon" />
 
                         <ImageButton
                             android:id="@+id/btninsta"
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:layout_marginEnd="4dp"
-                            android:layout_marginRight="4dp"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginRight="8dp"
                             android:background="@null"
                             android:src="@drawable/instgramicon" />
                     </LinearLayout>

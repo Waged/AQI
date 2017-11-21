@@ -25,5 +25,7 @@
     <string name="bad">Bad Air Quality</string>
     <string name="veryBad">Very Bad Air Quality</string>
     <string name="checkConnection">Check Connection</string>
+    <string name="doNothing">The air quality is good and has no general risks to sensitive people or even healthy people.</string>
+
 
 </resources>
