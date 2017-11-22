@@ -26,6 +26,9 @@
     <string name="veryBad">Very Bad Air Quality</string>
     <string name="checkConnection">Check Connection</string>
     <string name="doNothing">The air quality is good and has no general risks to sensitive people or even healthy people.</string>
+    <string name="doModerate">Air Quality is fine, except some minor pollutants for people highly sensitive people to air pollution.</string>
+    <string name="doVeryBad">This is a high alert emergency causing major health risks,not just for sensitive people but also for health people. This is a high alert risk, which could severely affect the health or even lead to death.</string>
+    <string name="doBad">There are health problems for everyone. Everyone is going to getting affected by it.</string>
 
 
 </resources>

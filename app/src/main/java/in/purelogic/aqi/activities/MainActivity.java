@@ -726,11 +726,13 @@ public class MainActivity extends AppCompatActivity
         ivAQI.setImageResource(setRelevantResAQI(airVisualModel.getmAQI()));
         tvTemp.setText(String.valueOf(airVisualModel.getmTemperature()));
         tvHumid.setText(String.valueOf(airVisualModel.getmHumidity()));
+        tvWhatToDo.setText(setRelevantWhatToDo(airVisualModel.getmAQI()));
         tvWindSpeed.setText(String.valueOf(airVisualModel.getmWindSpeed()));
         ivWeatherSymbol.setImageResource(setRelevantResWeather(airVisualModel.getmIcon()));
         Log.d("icon", airVisualModel.getmIcon());
         hideMyDialog();
     }
+
 
 
     private
