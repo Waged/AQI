@@ -18,12 +18,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,6 +31,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -38,6 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,12 +49,20 @@ import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
-import com.wang.avi.AVLoadingIndicatorView;
+
 import com.yalantis.phoenix.PullToRefreshView;
 
 import org.json.JSONObject;
@@ -74,7 +84,7 @@ import in.purelogic.aqi.R;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, LocationListener {
+        implements NavigationView.OnNavigationItemSelectedListener, LocationListener, PlaceSelectionListener {
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
     //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
@@ -87,26 +97,32 @@ public class MainActivity extends AppCompatActivity
     //  final static String OUR_URL = " https://api.aqi.in/locationData?";
 
     public static final String outdoorPrefs = "outdoorPrefs";
-    public static final String placeName = "placename";
     public static final String aqi = "aqi";
-    public static final String pm25 = "pm25";
-    public static final String temp = "temp";
-    public static final String humid = "humid";
+    // public static final String pm25 = "pm25";
+    // public static final String temp = "temp";
+    // public static final String humid = "humid";
     public static final String time = "time";
     public static final String message = "message";
     public boolean doubleBackToExitPressedOnce = false;
     public boolean isGeoFetchName = false;
     SharedPreferences outdoorSharedpreferences;
+
+
+    // The entry points to the Places API.
+    //private GeoDataClient mGeoDataClient;
+   // private PlaceDetectionClient mPlaceDetectionClient;
+
     String myPlaceNow;
     String myPlaceNowSmall;
+    String knownName;
     @BindView(R.id.drawer_layout)
     FlowingDrawer mDrawer;
     @BindView(R.id.btnLocations)
     ImageButton btnLocation;
     @BindView(R.id.btnNotification)
     ImageButton btnNotify;
-  //  @BindView(R.id.btnWhatAqi)
-   // ImageButton btnWhatAqi;
+    //  @BindView(R.id.btnWhatAqi)
+    // ImageButton btnWhatAqi;
 
     @BindView(R.id.tvWhatToDo)
     TextView tvWhatToDo;
@@ -136,8 +152,8 @@ public class MainActivity extends AppCompatActivity
     TextView tvCurrentLocation;
     @BindView(R.id.myCardView)
     CardView locationCard;
-    // @BindView(R.id.avi)
-    // AVLoadingIndicatorView avi;
+    @BindView(R.id.ibRetry)
+    ImageButton retry;
     @BindView(R.id.chart)
     RadarChart chart;
     @BindView(R.id.ivMenu)
@@ -152,6 +168,9 @@ public class MainActivity extends AppCompatActivity
     TextView tvHumid;
     @BindView(R.id.tvWindSpeed)
     TextView tvWindSpeed;
+
+
+
     Animation fade;
     MediaPlayer mp;
     ProgressDialog dialog;
@@ -163,15 +182,18 @@ public class MainActivity extends AppCompatActivity
     String NETWORK_LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
     final long MIN_TIME = 5000;        // Time between location updates (5000 milliseconds or 5 seconds)
     final float MIN_DISTANCE = 100;  // Distance between location updates (1000m or 1km)
+    final int REQUEST_CODE_AUTOCOMPLETE = 22;
     public static boolean gps_enabled = false;
     public static boolean network_enabled = false;
     final int REQUEST_CODE = 1;
+    AirVisualModel airVisualModel = null;
 
     @Override
     protected void onStart() {
         super.onStart();
         CheckOldAndroidVersion();
-        getAqiForCurrentLocation();
+        //  getAqiForCurrentLocation();
+
         Log.e("onStart", "Called");
     }
 
@@ -189,13 +211,13 @@ public class MainActivity extends AppCompatActivity
             LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             try {
                 gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                Log.d("gps", "status: " + gps_enabled);
+                Log.e("gps", "status: " + gps_enabled);
             } catch (Exception ex) {
                 Log.e("gps", ex.toString());
             }
             try {
                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                Log.d("network", "status: " + gps_enabled);
+                Log.e("network", "status: " + gps_enabled);
             } catch (Exception ex) {
                 Log.e("network", ex.toString());
             }
@@ -217,11 +239,28 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        if (!isNetworkConnected()) {
+            retry.setVisibility(View.VISIBLE);
+
+        } else {
+            getAqiForCurrentLocation();
+        }
+
+
+        //openAutocompleteActivity();
+
         //ToDo: for the sake of the Radar
         //******************************************
         //************************************************************
@@ -321,20 +360,39 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         mPullToRefreshView.setRefreshing(false);
                         Toast.makeText(MainActivity.this, "Refreshing..", Toast.LENGTH_SHORT).show();
+                        Log.e("getAqi", "inside swipe to refresh");
                         getAqiForCurrentLocation();
-                        Date date = Calendar.getInstance().getTime();
-                        String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
-                        String day = (String) DateFormat.format("dd", date); // 20
-                        String monthString = (String) DateFormat.format("MMM", date); // Jun
-                        String hourString = (String) DateFormat.format("HH", date); // Jun
-                        String minuteString = (String) DateFormat.format("mm", date);
-                        tvLastRefresh.setText(hourString + ":" + minuteString + " " + dayOfTheWeek + ", " + monthString + " " + day); // we are
+
+
                     }
                 }, 900);
             }
         });
 
 
+    }
+
+    private void openAutocompleteActivity() {
+        try {
+            // The autocomplete activity requires Google Play Services to be available. The intent
+            // builder checks this and throws an exception if it is not the case.
+            Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                    .build(this);
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+        } catch (GooglePlayServicesRepairableException e) {
+            // Indicates that Google Play Services is either not installed or not up to date. Prompt
+            // the user to correct the issue.
+            GoogleApiAvailability.getInstance().getErrorDialog(this, e.getConnectionStatusCode(),
+                    0 /* requestCode */).show();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            // Indicates that Google Play Services is not available and the problem is not easily
+            // resolvable.
+            String message = "Google Play Services is not available: " +
+                    GoogleApiAvailability.getInstance().getErrorString(e.errorCode);
+
+            Log.e("search", message);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -358,8 +416,7 @@ public class MainActivity extends AppCompatActivity
 
     // TODO: Add getAqiForCurrentLocation() here:
     private void getAqiForCurrentLocation() {
-        // avi.show();
-        Log.e("getAQI", "Called");
+        Log.e("getAQI", "from Inside getAqiForCurrentLocation Called");
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
 
@@ -378,7 +435,7 @@ public class MainActivity extends AppCompatActivity
                     params.put("lat", latReq);
                     params.put("lon", lonReq);
                     params.put("key", KEY);
-                    if(!isGeoFetchName) {
+                    if (!isGeoFetchName) {
                         new FindMe(MainActivity.this).execute();
                     }
                     //params.put("APPID", APPID);
@@ -418,7 +475,7 @@ public class MainActivity extends AppCompatActivity
     public void onLocationChanged(Location location) {
 
         getAqiForCurrentLocation();
-        Log.e("onLocationChanged", "Called");
+        Log.e("getAQI", "from onLocationChanged getAqiForCurrentLocation Called");
     }
 
     @Override
@@ -433,6 +490,35 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onProviderDisabled(String s) {
+        displayPromptForEnablingGPS(this);
+    }
+
+    //Searchables
+    @Override
+    public void onPlaceSelected(Place place) {
+        Log.i("search", "Place Selected: " + place.getName());
+
+        // Format the returned place's details and display them in the TextView.
+        // mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(), place.getId(),
+        //         place.getAddress(), place.getPhoneNumber(), place.getWebsiteUri()));
+        CharSequence attributions = place.getAttributions();
+        if (!TextUtils.isEmpty(attributions)) {
+            //.setText(Html.fromHtml(attributions.toString()));
+            Toast.makeText(this, attributions.toString(), Toast.LENGTH_SHORT).show();
+
+        } else {
+            //  mPlaceAttribution.setText("");
+            Toast.makeText(this, "no result", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //searchables
+    @Override
+    public void onError(Status status) {
+        Log.e("search", "onError: Status = " + status.toString());
+
+        Toast.makeText(this, "Place selection failed: " + status.getStatusMessage(),
+                Toast.LENGTH_SHORT).show();
 
     }
 
@@ -465,7 +551,8 @@ public class MainActivity extends AppCompatActivity
                     // String state = addresses.get(0).getAdminArea();
                     String city = addresses.get(0).getLocality();
                     String country = addresses.get(0).getCountryName();
-                    String knownName = addresses.get(0).getFeatureName();
+                    knownName = addresses.get(0).getFeatureName();
+
                     //  String full = address.getAddressLine(0);
                     Log.e("cityName", city);
                     // tvPlace.setText(cityName+" "+stateName);
@@ -557,6 +644,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     //ToDO: Managing Clicks
+
+
     @OnClick(R.id.btnLocations)
     void locationButton() {
         mp.start();
@@ -571,10 +660,18 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "btnNotification", Toast.LENGTH_SHORT).show();
     }
 
-   // @OnClick(R.id.btnWhatAqi)
+    // @OnClick(R.id.btnWhatAqi)
     //void whatsAQIbtn() {
-     //   Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
+    //   Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
     //}
+
+    @OnClick(R.id.ibRetry)
+    void retry() {
+        Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
+        CheckOldAndroidVersion();
+        getAqiForCurrentLocation();
+    }
+
 
     @OnClick(R.id.btnBlog)
     void blogBtn() {
@@ -635,8 +732,19 @@ public class MainActivity extends AppCompatActivity
         if (latitude != 0 && longitude != 0) {
             mapIntent.putExtra("latitude", latitude);
             mapIntent.putExtra("longitude", longitude);
-            mapIntent.putExtra("aqi", "22");
-            mapIntent.putExtra("location", myPlaceNow);
+            if (myPlaceNow != null && !myPlaceNow.equals("Re-locating..")) {
+                mapIntent.putExtra("location", myPlaceNow);
+            }
+            if (airVisualModel != null) {
+                mapIntent.putExtra("aqi", airVisualModel.getmAQI());  // integer
+                mapIntent.putExtra("humidity", airVisualModel.getmHumidity()); //integer
+                mapIntent.putExtra("temperature", airVisualModel.getmTemperature()); //integer
+                mapIntent.putExtra("knownname", knownName);
+            }
+        } else {
+            Log.e("airVisual", "it becomes null suddenly");
+            dialog.show();
+            getAqiForCurrentLocation();
         }
         startActivity(mapIntent);
     }
@@ -657,22 +765,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    //Todo onNoNeedGettingDataFromServer
-    private void getSavedValues() {
-        String mPlaceName = outdoorSharedpreferences.getString(placeName, "NA");
-        int mAqi = outdoorSharedpreferences.getInt(aqi, 0);
-        int mPm25 = outdoorSharedpreferences.getInt(pm25, 0);
-        double mTemperature = outdoorSharedpreferences.getFloat(temp, 0.0f);
-        int mHumidity = outdoorSharedpreferences.getInt(humid, 0);
-        String mTime = outdoorSharedpreferences.getString(time, "NA");
-        // OutdoorDataModel outdoorData = new OutdoorDataModel(mPlaceName, mAqi, mPm25, mTemperature, mHumidity, mTime);
-        //updateUI(outdoorData);
-        Toast.makeText(MainActivity.this, "Already have The latest Data", Toast.LENGTH_SHORT).show();
-    }
-
-
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
-        //  avi.show();
+
         showMyDialog();
 
         AsyncHttpClient client = new AsyncHttpClient();
@@ -681,10 +775,11 @@ public class MainActivity extends AppCompatActivity
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 //  avi.setVisibility(View.INVISIBLE);
+                retry.setVisibility(View.GONE);
                 hideMyDialog();
                 if (response != null) {
                     Log.d("response", response.toString());
-                    AirVisualModel airVisualModel = AirVisualModel.fromJson(response);
+                    airVisualModel = AirVisualModel.fromJson(response);
                     updateUI(airVisualModel);
                 }
 
@@ -697,7 +792,7 @@ public class MainActivity extends AppCompatActivity
                 super.onFailure(statusCode, headers, e, errorResponse);
                 hideMyDialog();
                 //getSavedValues();
-                //  avi.setVisibility(View.INVISIBLE);
+                retry.setVisibility(View.VISIBLE);
                 if (errorResponse != null) {
                     Log.d("json ", "failed : " + errorResponse.toString());
                 }
@@ -729,10 +824,17 @@ public class MainActivity extends AppCompatActivity
         tvWhatToDo.setText(setRelevantWhatToDo(airVisualModel.getmAQI()));
         tvWindSpeed.setText(String.valueOf(airVisualModel.getmWindSpeed()));
         ivWeatherSymbol.setImageResource(setRelevantResWeather(airVisualModel.getmIcon()));
+        Date date = Calendar.getInstance().getTime();
+        String dayOfTheWeek = (String) DateFormat.format("EEEE", date); // Thursday
+        String day = (String) DateFormat.format("dd", date); // 20
+        String monthString = (String) DateFormat.format("MMM", date); // Jun
+        String hourString = (String) DateFormat.format("HH", date); // Jun
+        String minuteString = (String) DateFormat.format("mm", date);
+        tvLastRefresh.setText(hourString + ":" + minuteString + " " + dayOfTheWeek + ", " + monthString + " " + day); // we are
+
         Log.d("icon", airVisualModel.getmIcon());
         hideMyDialog();
     }
-
 
 
     private
@@ -772,14 +874,11 @@ public class MainActivity extends AppCompatActivity
             return R.drawable.w13d;
         } else if (icon.equals("50d")) {
             return R.drawable.w50d;
-        }
-        else if (icon.equals("50d")) {
+        } else if (icon.equals("50d")) {
             return R.drawable.w50d;
-        }
-        else if (icon.equals("01n")) {
+        } else if (icon.equals("01n")) {
             return R.drawable.w01n;
-        }
-        else if (icon.equals("02n")) {
+        } else if (icon.equals("02n")) {
             return R.drawable.w02n;
         } else if (icon.equals("03n")) {
             return R.drawable.w03n;
@@ -795,8 +894,7 @@ public class MainActivity extends AppCompatActivity
             return R.drawable.w13n;
         } else if (icon.equals("50n")) {
             return R.drawable.w50n;
-        }
-        else if (icon.equals("50n")) {
+        } else if (icon.equals("50n")) {
             return R.drawable.w50n;
         }
 
@@ -833,7 +931,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private String setRelevantWhatToDo(int aqi){
+    private String setRelevantWhatToDo(int aqi) {
         if (aqi <= 50) {
             return getString(R.string.doNothing);
         } else if (aqi > 50 && aqi < 100) {

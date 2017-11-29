@@ -5,15 +5,17 @@ import com.google.android.gms.maps.model.LatLng;
 public class PlaceRecord {
 
     String locationName;
+    String aqi;
     int locationAqiImg;
     String locationMsg;
     String temp;
     String humid;
     String pm25;
-    LatLng latLng ;
+    //LatLng latLng ;
 
-    public PlaceRecord(String locationName, String locationMsg, String temp, String humid, String pm25) {
+    public PlaceRecord(String locationName,String aqi, String locationMsg, String temp, String humid, String pm25) {
         this.locationName = locationName;
+        this.aqi = aqi;
         this.locationMsg = locationMsg;
         this.temp = temp;
         this.humid = humid;
@@ -29,6 +31,10 @@ public class PlaceRecord {
         return locationName;
     }
 
+    public String getAqi() {
+        return aqi;
+    }
+
     public int getLocationAqiImg() {
         return locationAqiImg;
     }
@@ -37,10 +43,10 @@ public class PlaceRecord {
         return locationMsg;
     }
 
-    public LatLng getLatLng() {
+  //  public LatLng getLatLng() {
 
-        return latLng;
-    }
+//        return latLng;
+ //   }
 
     public String getTemp() {
         return temp;
@@ -54,33 +60,5 @@ public class PlaceRecord {
         return pm25;
     }
 
-//Setters
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
-    }
-
-    public void setLocationAqiImg(int locationAqiImg) {
-        this.locationAqiImg = locationAqiImg;
-    }
-
-    public void setLocationMsg(String locationMsg) {
-        this.locationMsg = locationMsg;
-    }
-
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
-    }
-
-    public void setTemp(String temp) {
-        this.temp = temp;
-    }
-
-    public void setHumid(String humid) {
-        this.humid = humid;
-    }
-
-    public void setPm25(String pm25) {
-        this.pm25 = pm25;
-    }
 
 }

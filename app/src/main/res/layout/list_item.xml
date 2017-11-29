@@ -1,159 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/map_fav_card_view"
     cardBackgroundColor="#60b0c8db"
     cardCornerRadius="4dp"
-    android:clickable="true"
     android:layout_width="match_parent"
     android:layout_height="110dp"
-    android:alpha=".8"
-    android:elevation="8dp"
-    app:cardElevation="8dp"
-    android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <RelativeLayout
+    android:layout_marginTop="8dp"
+    android:alpha=".8"
+    android:clickable="true"
+    android:elevation="8dp"
+    app:cardElevation="8dp">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+    <ImageView
+        android:id="@+id/ivAqiLevel"
+        android:layout_width="20dp"
+        android:scaleType="fitXY"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:src="@color/Grey" />
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ImageView
-            android:id="@+id/ivAqiLevel"
-            android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/map_tvMyLocation"
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:drawableLeft="@drawable/ic_location__24dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
+                android:gravity="bottom"
+                android:text="Your Location"
+                android:textAlignment="gravity" />
+
+            <ImageButton
+                android:id="@+id/ibRemove"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="end"
+                android:background="@null"
+                android:clickable="true"
+                android:onClick="addToFavourites"
+                android:layout_marginRight="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginTop="4dp"
+                android:padding="4dp"
+                android:scaleType="fitXY"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/close" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:src="@color/Grey"/>
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/mylocation"
-            android:layout_alignTop="@+id/ibRemove"
-            android:layout_alignRight="@+id/ivPm25"
-            android:layout_alignEnd="@+id/ivPm25"
-            android:layout_marginRight="17dp"
-            android:layout_marginEnd="17dp" />
+            android:orientation="horizontal">
 
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
 
-        <TextView
-            android:id="@+id/map_tvMyLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"
-            android:text="Your Location"
-            android:layout_above="@+id/ivPm25"
-            android:layout_alignLeft="@+id/ivPm25"
-            android:layout_alignStart="@+id/ivPm25"
-            android:layout_marginLeft="21dp"
-            android:layout_marginStart="21dp" />
-
-        <ImageButton
-            android:id="@+id/ibRemove"
-            android:clickable="true"
-            android:background="@null"
-            android:onClick="addToFavourites"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="4dp"
-            android:layout_marginRight="4dp"
-            android:layout_marginTop="4dp"
-            android:src="@drawable/close" />
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="4dp"
+                        android:drawableLeft="@drawable/ic_pm25"
+                        android:gravity="center"
+                        android:text="AQI \n ɱg/m³"
+                        android:typeface="serif" />
 
 
-        <ImageView
-            android:id="@+id/ivPm25"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/imageView2"
-            android:layout_marginLeft="33dp"
-            android:layout_marginStart="33dp"
-            android:layout_marginTop="23dp"
-            android:src="@drawable/ic_pm25" />
+                    <TextView
+                        android:id="@+id/map_tvAqi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+                        android:gravity="center"
+                        android:text="NA"
+                        android:textSize="20sp" />
 
 
-        <TextView
-            android:id="@+id/map_tvPm25"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/ivPm25"
-            android:layout_toEndOf="@+id/ivPm25"
-            android:layout_toRightOf="@+id/ivPm25"
-            android:text="NA" />
-
-        <TextView
-            android:id="@+id/tvStaticPm25"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/map_tvPm25"
-            android:layout_toEndOf="@+id/ivPm25"
-            android:layout_toRightOf="@+id/ivPm25"
-            android:text="PM2.5" />
-
-        <ImageView
-            android:id="@+id/ivHumidrature"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_alignBottom="@+id/map_tvPm25"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_temp" />
-
-        <TextView
-            android:id="@+id/map_tvTemp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/ivHumidrature"
-            android:layout_toEndOf="@+id/ivHumidrature"
-            android:layout_toRightOf="@+id/ivHumidrature"
-            android:text="NA" />
-        <TextView
-            android:id="@+id/tvStaticTemp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/map_tvTemp"
-            android:layout_toEndOf="@+id/ivHumidrature"
-            android:layout_toRightOf="@+id/ivHumidrature"
-            android:text="°C" />
+                </LinearLayout>
 
 
-        <ImageView
-            android:id="@+id/ivHumid"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:src="@drawable/ic_humid"
-            android:layout_alignBottom="@+id/map_tvTemp"
-            android:layout_toLeftOf="@+id/map_tvHumid"
-            android:layout_toStartOf="@+id/map_tvHumid" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableLeft="@drawable/ic_temp"
+                        android:gravity="center"
+                        android:text="Temp\n°C"
+                        android:typeface="serif" />
 
 
+                    <TextView
+                        android:id="@+id/map_tvTemp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+
+                        android:gravity="center"
+                        android:text="NA"
+                        android:textSize="20sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
 
-        <TextView
-            android:id="@+id/map_tvHumid"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="NA"
-            android:layout_alignBottom="@+id/ivHumid"
-            android:layout_toLeftOf="@+id/ibRemove"
-            android:layout_toStartOf="@+id/ibRemove" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableLeft="@drawable/ic_humid"
+                        android:gravity="center"
+                        android:text="Humid \n %"
+                        android:typeface="serif" />
 
+                    <TextView
+                        android:id="@+id/map_tvHumid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="4dp"
+                        android:gravity="center"
+                        android:text="NA"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
 
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvStaticHumi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Humi"
-            android:layout_alignTop="@+id/ivHumid"
-            android:layout_alignLeft="@+id/map_tvHumid"
-            android:layout_alignStart="@+id/map_tvHumid" />
+    </LinearLayout>
 
-    </RelativeLayout>
-</android.support.v7.widget.CardView>
+</LinearLayout>
+
+    </android.support.v7.widget.CardView>

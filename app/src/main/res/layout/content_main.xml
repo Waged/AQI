@@ -44,20 +44,41 @@
                         android:text="AQI"
                         android:textColor="@color/colorTextPrimaryGood"
                         android:textSize="18sp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:descendantFocusability="beforeDescendants"
+                        android:focusableInTouchMode="true">
+                        <ImageView
+                            android:id="@+id/ivMenu"
+                            android:layout_width="0dp"
+                            android:layout_height="25dp"
+                            android:layout_weight="1"
+                            android:layout_margin="8dp"
+                            android:clickable="true"
+                            android:onClick="openMenu"
+                            android:src="@drawable/menu" />
+                        <fragment
+                            android:layout_marginTop="20dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:id="@+id/autocomplete_fragment"
+                            android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+                            android:layout_width="0dp"
+                            android:layout_weight="8"
+                            android:layout_height="wrap_content" />
+
+
+                    </LinearLayout>
+
 
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/ivMenu"
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_margin="8dp"
-                            android:clickable="true"
-                            android:onClick="openMenu"
-                            android:src="@drawable/menu" />
+
+
 
                         <TextView
                             android:id="@+id/tvPlace"
@@ -88,6 +109,12 @@
                         android:maxLines="1"
                         android:textColor="@color/colorTextPrimaryGood"
                         android:textSize="18sp" />
+
+
+
+
+
+
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -169,8 +196,8 @@
 
                     <ImageView
                         android:id="@+id/ivAQICondition"
-                        android:layout_width="98dp"
-                        android:layout_height="94dp"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
                         android:layout_gravity="center"
                         android:layout_marginBottom="10dp"
                         android:layout_marginTop="23dp"
@@ -970,7 +997,6 @@
                         android:textColor="@color/colorAccent"
                         android:textStyle="bold" />
 
-
                     <GridLayout
                         android:layout_width="match_parent"
                         android:rowCount="2"
@@ -981,90 +1007,62 @@
                             android:id="@+id/btnNotification"
                             android:src="@drawable/gridnotify"
                             android:background="@null"
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
-                            android:scaleType="fitXY"
+                            android:layout_gravity="center"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
                         <ImageButton
                             android:id="@+id/btnLocations"
-                            android:src="@drawable/gridloc"
+                            android:src="@drawable/gridlocation"
                             android:background="@null"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:scaleType="fitXY"
+                            android:layout_gravity="center"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
                             android:layout_weight="1" />
-                        <TextView
-                            android:text="Notifications"
-                            android:layout_gravity="center_horizontal"
-                            android:gravity="center_vertical"
-                            android:background="@null"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
 
-                        <TextView
-                            android:text="  My Locations"
-                            android:layout_gravity="center_vertical"
-                            android:gravity="center"
-                            android:background="@null"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
 
                         <ImageButton
                             android:id="@+id/btnBlog"
                             android:src="@drawable/gridblog"
                             android:background="@null"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:scaleType="fitXY"
+                            android:layout_gravity="center"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
                         <ImageButton
                             android:id="@+id/btnWebsite"
                             android:src="@drawable/gridwebsite"
                             android:background="@null"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:scaleType="fitXY"
+                            android:layout_width="120dp"
+                            android:layout_gravity="center"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
                             android:layout_weight="1" />
-                        <TextView
-                            android:text="Our Blog"
-                            android:layout_gravity="center_horizontal"
-                            android:gravity="center_vertical"
-                            android:background="@null"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
 
-                        <TextView
-                            android:text=" Visit Website"
-                            android:layout_gravity="center_vertical"
-                            android:gravity="center"
-                            android:background="@null"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
 
                         <ImageButton
                             android:id="@+id/btnAboutUs"
                             android:src="@drawable/gridaboutus"
                             android:background="@null"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:scaleType="fitXY"
+                            android:layout_gravity="center"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
                         <ImageButton
                             android:background="@null"
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
-                            android:scaleType="fitXY"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
+                            android:scaleType="centerCrop"
                             android:layout_weight="1" />
-                        <TextView
-                            android:text="About Us"
-                            android:layout_gravity="center_horizontal"
-                            android:gravity="center_vertical"
-                            android:background="@null"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+
 
                     </GridLayout>
 

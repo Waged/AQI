@@ -1,6 +1,8 @@
 package in.purelogic.aqi.activities;
 
+import android.arch.persistence.room.Room;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -26,6 +28,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import in.purelogic.aqi.Adapters.FavLocationAdapter;
+import in.purelogic.aqi.Database.AppDatabase;
+import in.purelogic.aqi.Database.DetailLocation;
+import in.purelogic.aqi.Database.DetailLocationDao;
+
 import in.purelogic.aqi.PlaceRecord;
 import in.purelogic.aqi.R;
 
@@ -34,21 +40,32 @@ public class SavedLocations extends AppCompatActivity {
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+    AppDatabase db ;
 
 
-
-    private List<PlaceRecord> placeRecords = new ArrayList<>();
+    private List<DetailLocation> detailLocations = new ArrayList<>();
     private FavLocationAdapter mAdapter;
 
     @BindView(R.id.btnAddNewFav)
     Button btnAddNewFav;
+
+    @BindView(R.id.ibBack)
+    ImageButton btnBack;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved_locations);
         ButterKnife.bind(this);
-
+        db = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME).build();
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(SavedLocations.this,MainActivity.class));
+            }
+        });
         btnAddNewFav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,31 +73,37 @@ public class SavedLocations extends AppCompatActivity {
             }
         });
 
-        mAdapter = new FavLocationAdapter(placeRecords);
+
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(mAdapter);
         initPlacesData();
+
+
     }
 
     private void initPlacesData() {
-        PlaceRecord placeRecord = new PlaceRecord( "Rithala,Delhi","Good Air ", "27",  "50%", "103");
-        placeRecords.add(placeRecord);
 
-        placeRecord = new PlaceRecord("Rohini,Delhi","Good", "27",  "47%", "103");
-        placeRecords.add(placeRecord);
+        new AsyncTask<Void, Void, List<DetailLocation>>() {
+            @Override
+            protected List<DetailLocation> doInBackground(Void... params) {
+                DetailLocationDao ld = db.getDetailLocationDao();
+                detailLocations= ld.getAll();
+                return ld.getAll();
+            }
+            @Override
+            protected void onPostExecute(List<DetailLocation> locations) {
 
-        placeRecord = new PlaceRecord("Pitampura,Delhi","Good", "27", "47%","103");
-        placeRecords.add(placeRecord);
+                if(locations != null){
+                    mAdapter = new FavLocationAdapter(locations);
+                    recyclerView.setAdapter(mAdapter);
+                    mAdapter.notifyDataSetChanged();
+                }else{
+                    Toast.makeText(SavedLocations.this, "No Favourites Added Yet!", Toast.LENGTH_SHORT).show();
+                }
 
-        placeRecord = new PlaceRecord("NSP,Delhi","Good", "28", "47%","103");
-        placeRecords.add(placeRecord);
-
-        placeRecord = new PlaceRecord("Rajiv Chawk,Delhi","Good", "29", "47%","103");
-        placeRecords.add(placeRecord);
-
-        mAdapter.notifyDataSetChanged();
+            }
+        }.execute();
 
 
     }

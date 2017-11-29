@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -12,7 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="in.purelogic.aqi.activities.MapsActivity" />
-
     <android.support.v7.widget.CardView
         android:id="@+id/map_card_view"
         cardBackgroundColor="#60b0c8db"
@@ -73,7 +73,7 @@
 
 
             <TextView
-                android:id="@+id/map_tvPm25"
+                android:id="@+id/maps_tvAqi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/ivPm25"
@@ -85,7 +85,7 @@
                 android:id="@+id/tvStaticPm25"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/map_tvPm25"
+                android:layout_above="@id/maps_tvAqi"
                 android:layout_toEndOf="@+id/ivPm25"
                 android:layout_toRightOf="@+id/ivPm25"
                 android:text="PM2.5" />
@@ -94,7 +94,7 @@
                 android:id="@+id/ivHumidrature"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_alignBottom="@+id/map_tvPm25"
+                android:layout_alignBottom="@id/maps_tvAqi"
                 android:layout_centerHorizontal="true"
                 android:src="@drawable/ic_temp" />
 
@@ -151,4 +151,30 @@
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 
+<!--
+    <com.arlib.floatingsearchview.FloatingSearchView
+        android:layout_marginTop="25dp"
+        android:id="@+id/floating_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:floatingSearch_leftActionMode="showSearch"
+        app:floatingSearch_searchHint="Search..."
+        app:floatingSearch_suggestionsListAnimDuration="250"
+        app:floatingSearch_showSearchKey="false"
+        />
+-->
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="10dp">
+
+        <fragment
+            android:id="@+id/autocomplete_fragment"
+            android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </android.support.v7.widget.CardView>
 </FrameLayout>
