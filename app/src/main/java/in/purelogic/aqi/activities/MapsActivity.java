@@ -94,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     AirVisualModel airVisualModel;
     ProgressDialog dialog;
     private GoogleMap mMap;
-    String myLocation;
+    LatLng mySearchPlace ;
     PlaceAutocompleteFragment autocompleteFragment;
     LatLng myPlace;
     double latitude;
@@ -176,7 +176,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             tvHumi.setText(Integer.toString(humidity));
             tvTemp.setText(Integer.toString(temprature));
             tvAqi.setText(Integer.toString(aqi));
-            addMyMarker(aqi);
+            addMyMarker(myPlace,aqi);
 
         } else {
             //delhi in map
@@ -191,16 +191,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    private void addMyMarker(int aqi) {
+    private void addMyMarker(LatLng myPlace,int aqi) {
         if (aqi > 0 && aqi <= 50) {
             //good
             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
-
             mMap.addMarker(new MarkerOptions().position(myPlace).title(location).icon(icon).snippet("Current Location! "));
 
             for (int rad = 100; rad <= 500; rad += 10) {
                 CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(latitude, longitude))   //set center
+                        .center(myPlace)   //set center
                         .radius(rad)   //set radius in meters
                         .fillColor(Color.TRANSPARENT)  //default
                         .strokeColor(Color.GREEN)
@@ -219,7 +218,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(myPlace).title(location).icon(icon).snippet("Current Location! "));
             for (int rad = 100; rad <= 500; rad += 10) {
                 CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(latitude, longitude))   //set center
+                        .center(myPlace)   //set center
                         .radius(rad)   //set radius in meters
                         .fillColor(Color.TRANSPARENT)  //default
                         .strokeColor(Color.CYAN)
@@ -236,7 +235,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(myPlace).title(location).icon(icon).snippet("Current Location! "));
             for (int rad = 100; rad <= 500; rad += 10) {
                 CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(latitude, longitude))   //set center
+                        .center(myPlace)   //set center
                         .radius(rad)   //set radius in meters
                         .fillColor(Color.TRANSPARENT)  //default
                         .strokeColor(Color.YELLOW)
@@ -253,7 +252,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(myPlace).title(location).icon(icon).snippet("Current Location! "));
             for (int rad = 100; rad <= 500; rad += 10) {
                 CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(latitude, longitude))   //set center
+                        .center(myPlace)   //set center
                         .radius(rad)   //set radius in meters
                         .fillColor(Color.TRANSPARENT)  //default
                         .strokeColor(Color.RED)
@@ -270,7 +269,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(myPlace).title(location).icon(icon).snippet("Current Location! "));
             for (int rad = 100; rad <= 500; rad += 10) {
                 CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(latitude, longitude))   //set center
+                        .center(myPlace)   //set center
                         .radius(rad)   //set radius in meters
                         .fillColor(Color.TRANSPARENT)  //default
                         .strokeColor(Color.RED)
@@ -389,20 +388,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (place != null) {
             String SearchPlaceName = place.getName().toString().trim();
             tvLocation.setText(SearchPlaceName);
-            Toast.makeText(this, "place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
-            LatLng ltlng = place.getLatLng();
-            double lat = ltlng.latitude;
-            double lng = ltlng.longitude;
-            String latReq = Double.toString(latitude);
-            String lonReq = Double.toString(longitude);
+            Toast.makeText(this, "Refreshing place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
+             mySearchPlace = place.getLatLng();
+            double lat = mySearchPlace.latitude;
+            double lng = mySearchPlace.longitude;
+            String latReq = Double.toString(lat);
+            String lonReq = Double.toString(lng);
             Log.e("search", "Lat= "+lat+ ",Lng= "+lng);
             if (lat != 0.0 && lng != 0.0) {
                 Log.e("location", "location Achieved");
-                RequestParams params = new RequestParams();
-                params.put("lat", latReq);
-                params.put("lon", lonReq);
-                params.put("key", KEY);
-                letsDoSomeNetworkingOutdoor(params);
+                RequestParams params2 = new RequestParams();
+                params2.put("lat", latReq);
+                params2.put("lon", lonReq);
+                params2.put("key", KEY);
+                letsDoSomeNetworkingOutdoor(params2);
             }
         }
 
@@ -411,7 +410,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onError(Status status) {
         Log.e("search", "onError: Status = " + status.toString());
-        Toast.makeText(this, "Place selection failed: " + status.getStatusMessage(),
+        Toast.makeText(this, "No AQI Data in Location " + status.getStatusMessage(),
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -423,8 +422,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 hideMyDialog();
+                Log.e("searchS", response.toString());
                 if (response != null) {
-                    Log.d("response", response.toString());
+                    Log.e("response", response.toString());
                     airVisualModel = AirVisualModel.fromJson(response);
                     updateMapsUI(airVisualModel);
 
@@ -437,18 +437,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 super.onFailure(statusCode, headers, e, errorResponse);
                 hideMyDialog();
                 if (errorResponse != null) {
-                    Log.d("json ", "failed : " + errorResponse.toString());
+                    Log.e("searchF ", "failed : " + errorResponse.toString());
                 }
             }
         });
     }
 
-    private void updateMapsUI(AirVisualModel airVisualModel) {
+    private void updateMapsUI(AirVisualModel airVisualModel ) {
         if(airVisualModel!=null) {
             tvTemp.setText(airVisualModel.getmTemperature()+"");
             tvAqi.setText(airVisualModel.getmAQI()+"");
             tvHumi.setText(airVisualModel.getmHumidity()+"");
-           // addMyMarker(airVisualModel.getmAQI());
+            addMyMarker(mySearchPlace,airVisualModel.getmAQI());
         }
         else{
             tvLocation.setText("Couldn't Define your Location");

@@ -28,6 +28,6 @@
     <color name="satisfactory">#56b905</color>
     <color name="moderate">#fea82f</color>
     <color name="bad">#e3180a</color>
-    <color name="unhealthy">#8B38FF</color>
-    <color name="hazardous">#C20017</color>
+    <color name="unhealthy">#df105c</color>
+    <color name="hazardous">#baf1085a</color>
 </resources>

@@ -51,13 +51,13 @@
                         android:focusableInTouchMode="true">
                         <ImageView
                             android:id="@+id/ivMenu"
-                            android:layout_width="0dp"
+                            android:layout_width="25dp"
                             android:layout_height="25dp"
-                            android:layout_weight="1"
                             android:layout_margin="8dp"
                             android:clickable="true"
                             android:onClick="openMenu"
                             android:src="@drawable/menu" />
+                        <!--
                         <fragment
                             android:layout_marginTop="20dp"
                             android:layout_marginRight="8dp"
@@ -67,7 +67,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="8"
                             android:layout_height="wrap_content" />
-
+                            -->
 
                     </LinearLayout>
 

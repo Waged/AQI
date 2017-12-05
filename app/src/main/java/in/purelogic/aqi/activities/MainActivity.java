@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
     //  final static String OUR_URL = " https://api.aqi.in/locationData?";
 
     public static final String aqi = "aqi";
-
+    boolean isDialog = false ;
     public static final String time = "time";
     public static final String message = "message";
     public boolean doubleBackToExitPressedOnce = false;
@@ -252,6 +252,8 @@ public class MainActivity extends AppCompatActivity
             retry.setVisibility(View.VISIBLE);
 
         } else {
+            showMyDialog();
+            isDialog = true;
             getAqiForCurrentLocation();
         }
 
@@ -763,8 +765,10 @@ public class MainActivity extends AppCompatActivity
 
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
 
-        showMyDialog();
-
+        if(!isDialog) {
+            showMyDialog();
+            isDialog = true ;
+        }
         AsyncHttpClient client = new AsyncHttpClient();
         client.get(AIR_VISUAL_URL, requestParams, new JsonHttpResponseHandler() {
             @Override
@@ -807,6 +811,7 @@ public class MainActivity extends AppCompatActivity
 
     private void hideMyDialog() {
         dialog.hide();
+        isDialog= false ;
     }
 
     private void updateUI(AirVisualModel airVisualModel) {
@@ -905,7 +910,7 @@ public class MainActivity extends AppCompatActivity
         } else if (aqi > 50 && aqi < 100) {
             return R.color.moderate;
         } else if (aqi > 101 && aqi < 200) {
-            return R.color.unhealthy;
+            return R.color.bad;
         } else if (aqi > 200) {
             return R.color.hazardous;
         } else {

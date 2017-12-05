@@ -82,13 +82,12 @@
                 android:text="NA" />
 
             <TextView
-                android:id="@+id/tvStaticPm25"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_above="@id/maps_tvAqi"
                 android:layout_toEndOf="@+id/ivPm25"
                 android:layout_toRightOf="@+id/ivPm25"
-                android:text="PM2.5" />
+                android:text="AQI" />
 
             <ImageView
                 android:id="@+id/ivHumidrature"
