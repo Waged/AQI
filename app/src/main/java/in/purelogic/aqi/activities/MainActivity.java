@@ -39,7 +39,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -55,14 +54,12 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
-
 import com.yalantis.phoenix.PullToRefreshView;
 
 import org.json.JSONObject;
@@ -82,11 +79,12 @@ import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.Models.AirVisualModel;
 import in.purelogic.aqi.R;
 
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LocationListener, PlaceSelectionListener {
-    // Base URL
-    final String url = "https://www.facebook.com/aqiindia/";
+    public static final String aqi = "aqi";
+    public static final String time = "time";
+    public static final String message = "message";
+    //  final static String OUR_URL = " https://api.aqi.in/locationData?";
     //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
     // final static String KEY = "kbLpQXHgWm7PkczZM";
     // final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
@@ -94,21 +92,24 @@ public class MainActivity extends AppCompatActivity
 //"http://api.airvisual.com/v2/nearest_city?lat=35.98&lon=140.33&key={{YOUR_API_KEY}}";
     final static String AIR_VISUAL_URL = "http://api.airvisual.com/v2/nearest_city?";
     final static String KEY = "kbLpQXHgWm7PkczZM";
-    //  final static String OUR_URL = " https://api.aqi.in/locationData?";
-
-    public static final String aqi = "aqi";
-    boolean isDialog = false ;
-    public static final String time = "time";
-    public static final String message = "message";
-    public boolean doubleBackToExitPressedOnce = false;
-    public boolean isGeoFetchName = false;
-    SharedPreferences outdoorSharedpreferences;
-
+    public static boolean gps_enabled = false;
+    public static boolean network_enabled = false;
+    // Base URL
+    final String url = "https://www.facebook.com/aqiindia/";
+    final long MIN_TIME = 5000;        // Time between location updates (5000 milliseconds or 5 seconds)
+    final float MIN_DISTANCE = 100;  // Distance between location updates (1000m or 1km)
 
     // The entry points to the Places API.
     //private GeoDataClient mGeoDataClient;
-   // private PlaceDetectionClient mPlaceDetectionClient;
-
+    // private PlaceDetectionClient mPlaceDetectionClient;
+    final int REQUEST_CODE_AUTOCOMPLETE = 22;
+    final int REQUEST_CODE = 1;
+    public boolean doubleBackToExitPressedOnce = false;
+    public boolean isGeoFetchName = false;
+    boolean isDialog = false;
+    SharedPreferences outdoorSharedpreferences;
+    //  @BindView(R.id.btnWhatAqi)
+    // ImageButton btnWhatAqi;
     String myPlaceNow;
     String myPlaceNowSmall;
     String knownName;
@@ -118,9 +119,6 @@ public class MainActivity extends AppCompatActivity
     ImageButton btnLocation;
     @BindView(R.id.btnNotification)
     ImageButton btnNotify;
-    //  @BindView(R.id.btnWhatAqi)
-    // ImageButton btnWhatAqi;
-
     @BindView(R.id.tvWhatToDo)
     TextView tvWhatToDo;
     @BindView(R.id.btnBlog)
@@ -165,25 +163,67 @@ public class MainActivity extends AppCompatActivity
     TextView tvHumid;
     @BindView(R.id.tvWindSpeed)
     TextView tvWindSpeed;
-
-
-
     Animation fade;
     MediaPlayer mp;
     ProgressDialog dialog;
-
     // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mLocationManager;
     LocationListener mLocationListener;
     double latitude, longitude;
     String NETWORK_LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
-    final long MIN_TIME = 5000;        // Time between location updates (5000 milliseconds or 5 seconds)
-    final float MIN_DISTANCE = 100;  // Distance between location updates (1000m or 1km)
-    final int REQUEST_CODE_AUTOCOMPLETE = 22;
-    public static boolean gps_enabled = false;
-    public static boolean network_enabled = false;
-    final int REQUEST_CODE = 1;
     AirVisualModel airVisualModel = null;
+
+    public static void displayPromptForEnablingGPS(final Activity activity) {
+        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+        final String message = "Do you want open GPS setting?";
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            Log.e("gps", ex.toString());
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+            Log.e("network", ex.toString());
+        }
+        if (!gps_enabled && !network_enabled) {
+
+
+            builder.setMessage(message)
+                    .setPositiveButton("OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface d, int id) {
+                                    activity.startActivity(new Intent(action));
+                                    d.dismiss();
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface d, int id) {
+                                    d.cancel();
+                                }
+                            });
+            builder.create().show();
+        }
+    }
+
+    //facebook re-directing
+    public static Intent newFacebookIntent(PackageManager pm, String url) {
+        Uri uri = Uri.parse(url);
+        try {
+            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
+            if (applicationInfo.enabled) {
+                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
+                Log.d("facebookredirecting", "welldone");
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+            Log.d("facebookredirecting", "badme");
+        }
+        return new Intent(Intent.ACTION_VIEW, uri);
+    }
 
     @Override
     protected void onStart() {
@@ -193,7 +233,6 @@ public class MainActivity extends AppCompatActivity
 
         Log.e("onStart", "Called");
     }
-
 
     @Override
     protected void onResume() {
@@ -235,7 +274,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -411,7 +449,6 @@ public class MainActivity extends AppCompatActivity
         }, 2000);
     }
 
-
     // TODO: Add getAqiForCurrentLocation() here:
     private void getAqiForCurrentLocation() {
         Log.e("getAQI", "from Inside getAqiForCurrentLocation Called");
@@ -467,7 +504,6 @@ public class MainActivity extends AppCompatActivity
         mLocationManager.requestLocationUpdates(NETWORK_LOCATION_PROVIDER, MIN_TIME, MIN_DISTANCE, mLocationListener);
     }
 
-
     //TODO: Location Listeners
     @Override
     public void onLocationChanged(Location location) {
@@ -520,74 +556,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    //TODO: AsyncTask to fetch user location
-    private class FindMe extends AsyncTask<Void, Void, String> {
-        private Context appContext;
-
-        private FindMe(Context appContext) {
-            this.appContext = appContext;
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            Log.e("doInBackground", "Called");
-            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
-            List<Address> addresses;
-
-            try {
-                addresses = geocoder.getFromLocation(latitude, longitude, 1);
-                if (addresses != null && addresses.size() > 0) {
-                    Log.e("Adress", addresses.toString());
-                    Address address = addresses.get(0);
-                    // String cityName = address.getAddressLine(0);
-                    StringBuilder strReturnedAddress = new StringBuilder("");
-
-                    for (int i = 0; i <= 2; i++) {
-                        strReturnedAddress.append(address.getAddressLine(i)).append(",");
-                    }
-                    String strAdd = strReturnedAddress.toString();
-                    // String state = addresses.get(0).getAdminArea();
-                    String city = addresses.get(0).getLocality();
-                    String country = addresses.get(0).getCountryName();
-                    knownName = addresses.get(0).getFeatureName();
-
-                    //  String full = address.getAddressLine(0);
-                    Log.e("cityName", city);
-                    // tvPlace.setText(cityName+" "+stateName);
-                    if (knownName != null) {
-                        myPlaceNow = knownName + ", " + city + ", " + country;
-                        myPlaceNowSmall = knownName + ", " + city;
-                        if (myPlaceNow.length() > 33) {
-                            isGeoFetchName = true;
-                            return myPlaceNowSmall.trim();
-
-                        } else {
-                            isGeoFetchName = true;
-                            return myPlaceNow.trim();
-                        }
-
-                    }
-                    Log.e("knownName", "is empty");
-                    return strAdd;
-                }
-            } catch (IOException e) {
-                isGeoFetchName = false;
-                e.printStackTrace();
-                return "Re-locating..";
-            }
-            return null;
-        }
-
-        protected void onPostExecute(String result) {
-            tvPlace.setText(result);
-            tvCurrentLocation.setText(result);
-            // avi.hide();
-        }
-
-
-    }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -604,45 +572,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void displayPromptForEnablingGPS(final Activity activity) {
-        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
-        final String message = "Do you want open GPS setting?";
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-            Log.e("gps", ex.toString());
-        }
-
-        try {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ex) {
-            Log.e("network", ex.toString());
-        }
-        if (!gps_enabled && !network_enabled) {
-
-
-            builder.setMessage(message)
-                    .setPositiveButton("OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface d, int id) {
-                                    activity.startActivity(new Intent(action));
-                                    d.dismiss();
-                                }
-                            })
-                    .setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface d, int id) {
-                                    d.cancel();
-                                }
-                            });
-            builder.create().show();
-        }
-    }
-
     //ToDO: Managing Clicks
-
 
     @OnClick(R.id.btnLocations)
     void locationButton() {
@@ -747,27 +677,11 @@ public class MainActivity extends AppCompatActivity
         startActivity(mapIntent);
     }
 
-    //facebook re-directing
-    public static Intent newFacebookIntent(PackageManager pm, String url) {
-        Uri uri = Uri.parse(url);
-        try {
-            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
-            if (applicationInfo.enabled) {
-                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
-                Log.d("facebookredirecting", "welldone");
-            }
-        } catch (PackageManager.NameNotFoundException ignored) {
-            Log.d("facebookredirecting", "badme");
-        }
-        return new Intent(Intent.ACTION_VIEW, uri);
-    }
-
-
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
 
-        if(!isDialog) {
+        if (!isDialog) {
             showMyDialog();
-            isDialog = true ;
+            isDialog = true;
         }
         AsyncHttpClient client = new AsyncHttpClient();
         client.get(AIR_VISUAL_URL, requestParams, new JsonHttpResponseHandler() {
@@ -811,7 +725,7 @@ public class MainActivity extends AppCompatActivity
 
     private void hideMyDialog() {
         dialog.hide();
-        isDialog= false ;
+        isDialog = false;
     }
 
     private void updateUI(AirVisualModel airVisualModel) {
@@ -837,7 +751,6 @@ public class MainActivity extends AppCompatActivity
         hideMyDialog();
     }
 
-
     private
     @DrawableRes
     int setRelevantResAQI(int aqi) {
@@ -853,56 +766,53 @@ public class MainActivity extends AppCompatActivity
         return R.drawable.ic_dunno;
     }
 
-
     private
     @DrawableRes
     int setRelevantResWeather(String icon) {
-        if (icon.equals("01d")) {
-            return R.drawable.w01d;
-        } else if (icon.equals("02d")) {
-            return R.drawable.w02d;
-        } else if (icon.equals("03d")) {
-            return R.drawable.w03d;
-        } else if (icon.equals("04d")) {
-            return R.drawable.w04d;
-        } else if (icon.equals("09d")) {
-            return R.drawable.w09d;
-        } else if (icon.equals("10d")) {
-            return R.drawable.w10d;
-        } else if (icon.equals("11d")) {
-            return R.drawable.w11d;
-        } else if (icon.equals("13d")) {
-            return R.drawable.w13d;
-        } else if (icon.equals("50d")) {
-            return R.drawable.w50d;
-        } else if (icon.equals("50d")) {
-            return R.drawable.w50d;
-        } else if (icon.equals("01n")) {
-            return R.drawable.w01n;
-        } else if (icon.equals("02n")) {
-            return R.drawable.w02n;
-        } else if (icon.equals("03n")) {
-            return R.drawable.w03n;
-        } else if (icon.equals("04n")) {
-            return R.drawable.w04n;
-        } else if (icon.equals("09n")) {
-            return R.drawable.w09n;
-        } else if (icon.equals("10n")) {
-            return R.drawable.w10n;
-        } else if (icon.equals("11n")) {
-            return R.drawable.w11n;
-        } else if (icon.equals("13n")) {
-            return R.drawable.w13n;
-        } else if (icon.equals("50n")) {
-            return R.drawable.w50n;
-        } else if (icon.equals("50n")) {
-            return R.drawable.w50n;
+        switch (icon) {
+
+            case "01d":
+                return R.drawable.w01d;
+            case "02d":
+                return R.drawable.w02d;
+            case "03d":
+                return R.drawable.w03d;
+            case "04d":
+                return R.drawable.w04d;
+            case "09d":
+                return R.drawable.w09d;
+            case "10d":
+                return R.drawable.w10d;
+            case "11d":
+                return R.drawable.w11d;
+            case "13d":
+                return R.drawable.w13d;
+            case "50d":
+                return R.drawable.w50d;
+            case "01n":
+                return R.drawable.w01n;
+            case "02n":
+                return R.drawable.w02n;
+            case "03n":
+                return R.drawable.w03n;
+            case "04n":
+                return R.drawable.w04n;
+            case "09n":
+                return R.drawable.w09n;
+            case "10n":
+                return R.drawable.w10n;
+            case "11n":
+                return R.drawable.w11n;
+            case "13n":
+                return R.drawable.w13n;
+            case "50n":
+                return R.drawable.w50n;
+            default:
+                return R.drawable.dunno;
+
         }
 
-
-        return R.drawable.dunno;
     }
-
 
     private int setRelevantTxtColorAQI(int aqi) {
         if (aqi <= 50) {
@@ -946,12 +856,78 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     //For Menu to Override method
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@Nullable MenuItem item) {
         return true;
+    }
+
+    //TODO: AsyncTask to fetch user location
+    private class FindMe extends AsyncTask<Void, Void, String> {
+        private Context appContext;
+
+        private FindMe(Context appContext) {
+            this.appContext = appContext;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            Log.e("doInBackground", "Called");
+            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
+            List<Address> addresses;
+
+            try {
+                addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                if (addresses != null && addresses.size() > 0) {
+                    Log.e("Adress", addresses.toString());
+                    Address address = addresses.get(0);
+                    // String cityName = address.getAddressLine(0);
+                    StringBuilder strReturnedAddress = new StringBuilder("");
+
+                    for (int i = 0; i <= 2; i++) {
+                        strReturnedAddress.append(address.getAddressLine(i)).append(",");
+                    }
+                    String strAdd = strReturnedAddress.toString();
+                    // String state = addresses.get(0).getAdminArea();
+                    String city = addresses.get(0).getLocality();
+                    String country = addresses.get(0).getCountryName();
+                    knownName = addresses.get(0).getFeatureName();
+
+                    //  String full = address.getAddressLine(0);
+                    Log.e("cityName", city);
+                    // tvPlace.setText(cityName+" "+stateName);
+                    if (knownName != null) {
+                        myPlaceNow = knownName + ", " + city + ", " + country;
+                        myPlaceNowSmall = knownName + ", " + city;
+                        if (myPlaceNow.length() > 33) {
+                            isGeoFetchName = true;
+                            return myPlaceNowSmall.trim();
+
+                        } else {
+                            isGeoFetchName = true;
+                            return myPlaceNow.trim();
+                        }
+
+                    }
+                    Log.e("knownName", "is empty");
+                    return strAdd;
+                }
+            } catch (IOException e) {
+                isGeoFetchName = false;
+                e.printStackTrace();
+                return "Re-locating..";
+            }
+            return null;
+        }
+
+        protected void onPostExecute(String result) {
+            tvPlace.setText(result);
+            tvCurrentLocation.setText(result);
+            // avi.hide();
+        }
+
+
     }
 
 

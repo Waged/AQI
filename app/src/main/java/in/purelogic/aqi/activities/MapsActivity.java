@@ -1,12 +1,9 @@
 package in.purelogic.aqi.activities;
 
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.arch.persistence.room.Room;
 import android.content.Context;
-
-import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
@@ -18,22 +15,16 @@ import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
-import android.text.Html;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.arlib.floatingsearchview.FloatingSearchView;
-import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,7 +33,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -94,12 +84,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     AirVisualModel airVisualModel;
     ProgressDialog dialog;
     private GoogleMap mMap;
-    LatLng mySearchPlace ;
+    LatLng mySearchPlace;
     PlaceAutocompleteFragment autocompleteFragment;
     LatLng myPlace;
     double latitude;
     double longitude;
-    boolean isFavourite = false;
     String location = "NA";
     String knownName = null;
     int aqi = 0;
@@ -176,7 +165,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             tvHumi.setText(Integer.toString(humidity));
             tvTemp.setText(Integer.toString(temprature));
             tvAqi.setText(Integer.toString(aqi));
-            addMyMarker(myPlace,aqi);
+            addMyMarker(myPlace, aqi);
 
         } else {
             //delhi in map
@@ -191,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    private void addMyMarker(LatLng myPlace,int aqi) {
+    private void addMyMarker(LatLng myPlace, int aqi) {
         if (aqi > 0 && aqi <= 50) {
             //good
             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
@@ -342,13 +331,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Toast.makeText(this, "Long Pressed", Toast.LENGTH_SHORT).show();
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        String label = new Date().toString();
+        String label ;
         //reference to the marker
         if (m != null) { //if marker exists (not null or whatever)
             try {
                 List<Address> listAddresses = geocoder.getFromLocation(point.latitude, point.longitude, 1);
                 if (listAddresses != null && listAddresses.size() > 0) {
-                    label = listAddresses.get(0).getAddressLine(0);
                     m.setPosition(point);
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
@@ -385,25 +373,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onPlaceSelected(Place place) {
         Log.e("search", place.getName().toString());
-        if (place != null) {
-            String SearchPlaceName = place.getName().toString().trim();
-            tvLocation.setText(SearchPlaceName);
-            Toast.makeText(this, "Refreshing place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
-             mySearchPlace = place.getLatLng();
-            double lat = mySearchPlace.latitude;
-            double lng = mySearchPlace.longitude;
-            String latReq = Double.toString(lat);
-            String lonReq = Double.toString(lng);
-            Log.e("search", "Lat= "+lat+ ",Lng= "+lng);
-            if (lat != 0.0 && lng != 0.0) {
-                Log.e("location", "location Achieved");
-                RequestParams params2 = new RequestParams();
-                params2.put("lat", latReq);
-                params2.put("lon", lonReq);
-                params2.put("key", KEY);
-                letsDoSomeNetworkingOutdoor(params2);
-            }
+        String SearchPlaceName = place.getName().toString().trim();
+        tvLocation.setText(SearchPlaceName);
+        Toast.makeText(this, "Refreshing place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
+        mySearchPlace = place.getLatLng();
+        double lat = mySearchPlace.latitude;
+        double lng = mySearchPlace.longitude;
+        String latReq = Double.toString(lat);
+        String lonReq = Double.toString(lng);
+        Log.e("search", "Lat= " + lat + ",Lng= " + lng);
+        if (lat != 0.0 && lng != 0.0) {
+            Log.e("location", "location Achieved");
+            RequestParams params2 = new RequestParams();
+            params2.put("lat", latReq);
+            params2.put("lon", lonReq);
+            params2.put("key", KEY);
+            letsDoSomeNetworkingOutdoor(params2);
         }
+
 
     }
 
@@ -423,13 +410,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 super.onSuccess(statusCode, headers, response);
                 hideMyDialog();
                 Log.e("searchS", response.toString());
-                if (response != null) {
-                    Log.e("response", response.toString());
-                    airVisualModel = AirVisualModel.fromJson(response);
-                    updateMapsUI(airVisualModel);
+                Log.e("response", response.toString());
+                airVisualModel = AirVisualModel.fromJson(response);
+                updateMapsUI(airVisualModel);
 
-                }
-                return;
             }
 
             @Override
@@ -443,14 +427,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    private void updateMapsUI(AirVisualModel airVisualModel ) {
-        if(airVisualModel!=null) {
-            tvTemp.setText(airVisualModel.getmTemperature()+"");
-            tvAqi.setText(airVisualModel.getmAQI()+"");
-            tvHumi.setText(airVisualModel.getmHumidity()+"");
-            addMyMarker(mySearchPlace,airVisualModel.getmAQI());
-        }
-        else{
+    private void updateMapsUI(AirVisualModel airVisualModel) {
+        if (airVisualModel != null) {
+            tvTemp.setText(airVisualModel.getmTemperature() + "");
+            tvAqi.setText(airVisualModel.getmAQI() + "");
+            tvHumi.setText(airVisualModel.getmHumidity() + "");
+            addMyMarker(mySearchPlace, airVisualModel.getmAQI());
+        } else {
             tvLocation.setText("Couldn't Define your Location");
             tvAqi.setText("NA");
             tvHumi.setText("NA");
