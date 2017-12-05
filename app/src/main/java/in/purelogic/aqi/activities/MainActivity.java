@@ -96,11 +96,8 @@ public class MainActivity extends AppCompatActivity
     final static String KEY = "kbLpQXHgWm7PkczZM";
     //  final static String OUR_URL = " https://api.aqi.in/locationData?";
 
-    public static final String outdoorPrefs = "outdoorPrefs";
     public static final String aqi = "aqi";
-    // public static final String pm25 = "pm25";
-    // public static final String temp = "temp";
-    // public static final String humid = "humid";
+
     public static final String time = "time";
     public static final String message = "message";
     public boolean doubleBackToExitPressedOnce = false;
@@ -278,7 +275,7 @@ public class MainActivity extends AppCompatActivity
         //  entries2.add(new Entry(30, 3));
         //  entries2.add(new Entry(40, 4));
         //  entries2.add(new Entry(80, 5));
-        RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Today's Reading");
+        RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Average AQI-Reading'\'Month");
         //  RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
         dataset_comp1.setColor(Color.RED);
         dataset_comp1.setDrawFilled(true);
@@ -333,7 +330,7 @@ public class MainActivity extends AppCompatActivity
         tvDate.setText(dayOfTheWeek + ", " + monthString + " " + day);
         locationCard.setCardBackgroundColor(Color.TRANSPARENT);
         locationCard.setCardElevation(4.0f);
-        outdoorSharedpreferences = getSharedPreferences(outdoorPrefs, Context.MODE_PRIVATE);
+
         //Todo: Elastic Drawer to view Settings
         mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
         mDrawer.setOnDrawerStateChangeListener(new ElasticDrawer.OnDrawerStateChangeListener() {
@@ -401,7 +398,6 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
             return;
         }
-
         this.doubleBackToExitPressedOnce = true;
         Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT).show();
 

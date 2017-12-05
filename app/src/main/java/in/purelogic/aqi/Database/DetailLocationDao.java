@@ -32,6 +32,11 @@ public interface DetailLocationDao {
    @Delete
     void deleteOne(DetailLocation detailLocation);
 
+
+    @Query("SELECT * FROM detaillocation where locationname LIKE :name ")
+    DetailLocation findByPlaceName(String name);
+
+
    // @Query("UPDATE placerecord SET Column1 = someValue WHERE columnId = :placeRecord.getLocationName()")
   //  void updateOne(PlaceRecord placeRecord);
 

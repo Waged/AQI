@@ -1,6 +1,8 @@
 package in.purelogic.aqi.activities;
 
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 
@@ -26,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.suggestions.model.SearchSuggestion;
 import com.google.android.gms.common.api.Status;
@@ -44,6 +47,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Date;
@@ -53,16 +61,20 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cz.msebera.android.httpclient.Header;
 import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.Database.AppDatabase;
 import in.purelogic.aqi.Database.DetailLocation;
 import in.purelogic.aqi.Database.DetailLocationDao;
 
 
+import in.purelogic.aqi.Models.AirVisualModel;
 import in.purelogic.aqi.R;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener,PlaceSelectionListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, PlaceSelectionListener {
 
+    final static String AIR_VISUAL_URL = "http://api.airvisual.com/v2/nearest_city?";
+    final static String KEY = "kbLpQXHgWm7PkczZM";
 
     @BindView(R.id.map_tvMyLocation)
     TextView tvLocation;
@@ -78,12 +90,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @BindView(R.id.maps_tvAqi)
     TextView tvAqi;
-   // @BindView(R.id.autocomplete_fragment)
-   // PlaceAutocompleteFragment autocompleteFragment;
 
-    // @BindView(R.id.floating_search_view)
-   // FloatingSearchView floatingSearchView;
-
+    AirVisualModel airVisualModel;
+    ProgressDialog dialog;
     private GoogleMap mMap;
     String myLocation;
     PlaceAutocompleteFragment autocompleteFragment;
@@ -125,51 +134,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         // Retrieve the PlaceAutocompleteFragment.
-         autocompleteFragment = (PlaceAutocompleteFragment)
+        autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(MapsActivity.this);
-
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-                Log.i("search", "Place: " + place.getName());
-                Toast.makeText(MapsActivity.this, place.getName(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("search", "An error occurred: " + status);
-                Toast.makeText(MapsActivity.this, status.toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-/*
-        floatingSearchView.setOnQueryChangeListener(new FloatingSearchView.OnQueryChangeListener() {
-            @Override
-            public void onSearchTextChanged(String oldQuery, final String newQuery) {
-                //get suggestions based on newQuery
-                Geocoder gc = new Geocoder(MapsActivity.this);
-                if (gc.isPresent()) {
-                    List<Address> list = null;
-                    try {
-                        list = gc.getFromLocationName(newQuery, 1);
-                       // floatingSearchView.setSu
-                     //   Toast.makeText(MapsActivity.this, list.get(0)+"", Toast.LENGTH_SHORT).show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Address address = list.get(0);
-                    double lat = address.getLatitude();
-                    double lng = address.getLongitude();
-
-
-                    //pass them on to the search view
-                 //   floatingSearchView.swapSuggestions (list);
-                }
-            }
-        });*/
         // Intent i = getIntent();
         // int location = i.getIntExtra("locationInfo", -1);
 
@@ -332,19 +299,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 DetailLocationDao ldd = db.getDetailLocationDao();
                 List<DetailLocation> locationsList = db.getDetailLocationDao().getAll();
                 String placeName = null;
-                if (locationsList.size() == 0) {
+                if (locationsList.size() == 0 || locationsList == null) {
+                    Log.e("favourites", "location list empty");
                     ldd.insertAll(detailLocation);
                     return true;
                 } else {
                     for (int i = 0; i < locationsList.size(); i++) {
                         placeName = locationsList.get(i).getLocationName();
-                        if (!placeName.contains(knownName)) {
-                            ldd.insertAll(detailLocation);
-                            return true;
+                        if (placeName.contains(knownName)) {
+                            Log.e("favourites", "placeName contains in the list ");
+                            return false;
                         }
                     }
+                    ldd.insertAll(detailLocation);
+                    return false;
                 }
-                return false;
+
             }
 
             @Override
@@ -367,31 +337,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }.execute();
 
     }
-        /*
-        else {
-            isFavourite = false;
-            ivAddToFav.setImageResource(R.drawable.ic_notinfavorites);
-            new AsyncTask<Void, Void, Void>() {
-              @Override
-                protected Void doInBackground(Void... params) {
-                    DetailLocationDao ldd = db.getDetailLocationDao();
-                    List<DetailLocation> notes = db.getDetailLocationDao().getAll();
-                    for(int i = 0 ; i<notes.size();i++){
-                        String deletedData = notes.get(i).getLocationName();
-                        if(deletedData.equals(detailLocation.getLocationName())){
-                            ldd.deleteAll(notes.get(i));
-                        }
-                    }
-                    return null ;
-                }
-                @Override
-                protected void onPostExecute(Void v) {
-                    Toast.makeText(MapsActivity.this, "Removed from favourites", Toast.LENGTH_SHORT).show();
-                }
-            }.execute();
-
-        }
-    }*/
 
     @Override
     public void onMapLongClick(LatLng point) {
@@ -440,31 +385,91 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onPlaceSelected(Place place) {
-
-        Log.e("search",place.getName().toString());
-
-
-        // Format the returned place's details and display them in the TextView.
-      //  mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(), place.getId(),
-         //       place.getAddress(), place.getPhoneNumber(), place.getWebsiteUri()));
-
-     //   CharSequence attributions = place.getAttributions();
-      //  if (!TextUtils.isEmpty(attributions)) {
-           // mPlaceAttribution.setText(Html.fromHtml(attributions.toString()));
-       // } else {
-          //  mPlaceAttribution.setText("");
-       // }
+        Log.e("search", place.getName().toString());
+        if (place != null) {
+            String SearchPlaceName = place.getName().toString().trim();
+            tvLocation.setText(SearchPlaceName);
+            Toast.makeText(this, "place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
+            LatLng ltlng = place.getLatLng();
+            double lat = ltlng.latitude;
+            double lng = ltlng.longitude;
+            String latReq = Double.toString(latitude);
+            String lonReq = Double.toString(longitude);
+            Log.e("search", "Lat= "+lat+ ",Lng= "+lng);
+            if (lat != 0.0 && lng != 0.0) {
+                Log.e("location", "location Achieved");
+                RequestParams params = new RequestParams();
+                params.put("lat", latReq);
+                params.put("lon", lonReq);
+                params.put("key", KEY);
+                letsDoSomeNetworkingOutdoor(params);
+            }
+        }
 
     }
 
     @Override
     public void onError(Status status) {
         Log.e("search", "onError: Status = " + status.toString());
-
         Toast.makeText(this, "Place selection failed: " + status.getStatusMessage(),
                 Toast.LENGTH_SHORT).show();
-
     }
 
+    private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
+        showMyDialog();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(AIR_VISUAL_URL, requestParams, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
+                hideMyDialog();
+                if (response != null) {
+                    Log.d("response", response.toString());
+                    airVisualModel = AirVisualModel.fromJson(response);
+                    updateMapsUI(airVisualModel);
+
+                }
+                return;
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, e, errorResponse);
+                hideMyDialog();
+                if (errorResponse != null) {
+                    Log.d("json ", "failed : " + errorResponse.toString());
+                }
+            }
+        });
+    }
+
+    private void updateMapsUI(AirVisualModel airVisualModel) {
+        if(airVisualModel!=null) {
+            tvTemp.setText(airVisualModel.getmTemperature()+"");
+            tvAqi.setText(airVisualModel.getmAQI()+"");
+            tvHumi.setText(airVisualModel.getmHumidity()+"");
+           // addMyMarker(airVisualModel.getmAQI());
+        }
+        else{
+            tvLocation.setText("Couldn't Define your Location");
+            tvAqi.setText("NA");
+            tvHumi.setText("NA");
+            tvTemp.setText("NA");
+        }
+    }
+
+
+    private void showMyDialog() {
+        dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage("Loading. Please wait...");
+        dialog.setIndeterminate(true);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+    }
+
+    private void hideMyDialog() {
+        dialog.hide();
+    }
 
 }
