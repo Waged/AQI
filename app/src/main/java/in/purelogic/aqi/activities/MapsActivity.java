@@ -422,7 +422,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ivAddToFav.setVisibility(View.VISIBLE);
                 Log.e("searchS", response.toString());
                 airVisualModel = AirVisualModel.fromJson(response);
-                detailLocation.setLocationName(placeName1);
                 double dLat = mySearchPlace.latitude;
                 String lat = Double.toString(dLat);
                 double dLng = mySearchPlace.latitude;
@@ -432,6 +431,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 detailLocation.setTemprature(airVisualModel.getmTemperature());
                 detailLocation.setAqiLevel(airVisualModel.getmAQI());
                 detailLocation.setHumidity(airVisualModel.getmHumidity());
+                detailLocation.setLocationName(knownName);
                 updateMapsUI(airVisualModel);
 
             }
@@ -500,21 +500,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     String strAdd = strReturnedAddress.toString();
                     String city = addresses.get(0).getLocality();
-                    String country = addresses.get(0).getCountryName();
                      knownName = addresses.get(0).getFeatureName();
-                    Log.e("cityName", city);
-                    if (knownName != null) {
-                        knownName = knownName + ", " + city + ", " + country;
-                        String knownNameSmall = knownName + ", " + city;
-                        if (knownName.length() > 33) {
-                            knownName = knownNameSmall;
-                            return knownName.trim();
+                    if (knownName != null && city != null) {
+                       String knownName2 = knownName ;
+                        knownName = knownName + ", " + city;
 
-                        } else {
-
+                        if(knownName.length() < 22) {
                             return knownName.trim();
                         }
-
+                        else{
+                            knownName = knownName2 ;
+                            return  knownName ;
+                        }
                     }
                     Log.e("knownName", "is empty");
                     return strAdd;
