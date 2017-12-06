@@ -41,14 +41,10 @@ public class SavedLocations extends AppCompatActivity {
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
     AppDatabase db ;
-
-
     private List<DetailLocation> detailLocations = new ArrayList<>();
     private FavLocationAdapter mAdapter;
-
     @BindView(R.id.btnAddNewFav)
     Button btnAddNewFav;
-
     @BindView(R.id.ibBack)
     ImageButton btnBack;
 
@@ -72,18 +68,13 @@ public class SavedLocations extends AppCompatActivity {
                 Toast.makeText(SavedLocations.this, "We will redirect to Maps !", Toast.LENGTH_SHORT).show();
             }
         });
-
-
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         initPlacesData();
-
-
     }
 
     private void initPlacesData() {
-
         new AsyncTask<Void, Void, List<DetailLocation>>() {
             @Override
             protected List<DetailLocation> doInBackground(Void... params) {
@@ -101,10 +92,8 @@ public class SavedLocations extends AppCompatActivity {
                 }else{
                     Toast.makeText(SavedLocations.this, "No Favourites Added Yet!", Toast.LENGTH_SHORT).show();
                 }
-
             }
         }.execute();
-
 
     }
 

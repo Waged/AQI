@@ -107,9 +107,6 @@ public class MainActivity extends AppCompatActivity
     public boolean doubleBackToExitPressedOnce = false;
     public boolean isGeoFetchName = false;
     boolean isDialog = false;
-    SharedPreferences outdoorSharedpreferences;
-    //  @BindView(R.id.btnWhatAqi)
-    // ImageButton btnWhatAqi;
     String myPlaceNow;
     String myPlaceNowSmall;
     String knownName;
@@ -646,7 +643,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @OnClick(R.id.ivMenu)
-    void openMenu(View v) {
+    void openMenu() {
         if (!mDrawer.isActivated()) {
             ivMenu.setAnimation(fade);
             mDrawer.openMenu();
@@ -697,8 +694,6 @@ public class MainActivity extends AppCompatActivity
                     updateUI(airVisualModel);
                 }
 
-                //  avi.setVisibility(View.INVISIBLE);
-                return;
             }
 
             @Override
@@ -866,7 +861,6 @@ public class MainActivity extends AppCompatActivity
     //TODO: AsyncTask to fetch user location
     private class FindMe extends AsyncTask<Void, Void, String> {
         private Context appContext;
-
         private FindMe(Context appContext) {
             this.appContext = appContext;
         }

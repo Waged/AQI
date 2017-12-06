@@ -87,6 +87,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng mySearchPlace;
     PlaceAutocompleteFragment autocompleteFragment;
     LatLng myPlace;
+    String placeName1 ="" ;
+    double placeSelectedLat ;
+    double placeSelectedLng ;
     double latitude;
     double longitude;
     String location = "NA";
@@ -101,6 +104,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Marker m = null;
     private AppDatabase db;
     DetailLocation detailLocation;
+
     String searchedCity;
 
     @Override
@@ -149,6 +153,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (bundle != null) {
             latitude = bundle.getDouble("latitude");
             longitude = bundle.getDouble("longitude");
+            LatLng latLng = new LatLng(latitude,longitude);
             myPlace = new LatLng(latitude, longitude);
             location = bundle.getString("location");
             aqi = bundle.getInt("aqi");
@@ -161,6 +166,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             detailLocation.setAqiLevel(aqi);
             detailLocation.setHumidity(humidity);
             detailLocation.setTemprature(temprature);
+            double dLat = latLng.latitude;
+            String lat = Double.toString(dLat);
+            double dLng = latLng.latitude;
+            String lng = Double.toString(dLng);
+            detailLocation.setLat(lat);
+            detailLocation.setLng(lng);
             tvLocation.setText(location);
             tvHumi.setText(Integer.toString(humidity));
             tvTemp.setText(Integer.toString(temprature));
@@ -275,10 +286,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @OnClick(R.id.ivFav)
     public void addToFavourites() {
 
-
-        // if (!isFavourite) {
-        //     isFavourite = true;
-
         new AsyncTask<Void, Void, Boolean>() {
             Animation fade = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_right);
 
@@ -294,13 +301,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 } else {
                     for (int i = 0; i < locationsList.size(); i++) {
                         placeName = locationsList.get(i).getLocationName();
-                        if (placeName.contains(knownName)) {
+                        if (placeName.contains(knownName) ) {
                             Log.e("favourites", "placeName contains in the list ");
                             return false;
                         }
                     }
                     ldd.insertAll(detailLocation);
-                    return false;
+                    return true;
                 }
 
             }
@@ -376,13 +383,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String SearchPlaceName = place.getName().toString().trim();
         tvLocation.setText(SearchPlaceName);
         Toast.makeText(this, "Refreshing place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
+        knownName = place.getName().toString();
         mySearchPlace = place.getLatLng();
-        double lat = mySearchPlace.latitude;
-        double lng = mySearchPlace.longitude;
-        String latReq = Double.toString(lat);
-        String lonReq = Double.toString(lng);
-        Log.e("search", "Lat= " + lat + ",Lng= " + lng);
-        if (lat != 0.0 && lng != 0.0) {
+         placeSelectedLat = mySearchPlace.latitude;
+         placeSelectedLng = mySearchPlace.longitude;
+        new FindMe(MapsActivity.this).execute();
+        String latReq = Double.toString(placeSelectedLat);
+        String lonReq = Double.toString(placeSelectedLng);
+        Log.e("search", "Lat= " + placeSelectedLng + ",Lng= " + placeSelectedLng);
+        if (placeSelectedLat != 0.0 && placeSelectedLng != 0.0) {
             Log.e("location", "location Achieved");
             RequestParams params2 = new RequestParams();
             params2.put("lat", latReq);
@@ -409,9 +418,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 hideMyDialog();
+                ivAddToFav.setImageResource(R.drawable.ic_notinfavorites);
+                ivAddToFav.setVisibility(View.VISIBLE);
                 Log.e("searchS", response.toString());
-                Log.e("response", response.toString());
                 airVisualModel = AirVisualModel.fromJson(response);
+                detailLocation.setLocationName(placeName1);
+                double dLat = mySearchPlace.latitude;
+                String lat = Double.toString(dLat);
+                double dLng = mySearchPlace.latitude;
+                String lng = Double.toString(dLng);
+                detailLocation.setLat(lat);
+                detailLocation.setLng(lng);
+                detailLocation.setTemprature(airVisualModel.getmTemperature());
+                detailLocation.setAqiLevel(airVisualModel.getmAQI());
+                detailLocation.setHumidity(airVisualModel.getmHumidity());
                 updateMapsUI(airVisualModel);
 
             }
@@ -455,4 +475,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.hide();
     }
 
+
+    //TODO: AsyncTask to fetch user location
+    private class FindMe extends AsyncTask<Void, Void, String> {
+        private Context appContext;
+        private FindMe(Context appContext) {
+            this.appContext = appContext;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            Log.e("doInBackground", "Called");
+            Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
+            List<Address> addresses;
+
+            try {
+                addresses = geocoder.getFromLocation(placeSelectedLat, placeSelectedLng, 1);
+                if (addresses != null && addresses.size() > 0) {
+                    Log.e("Adress", addresses.toString());
+                    Address address = addresses.get(0);
+                    StringBuilder strReturnedAddress = new StringBuilder("");
+                    for (int i = 0; i <= 2; i++) {
+                        strReturnedAddress.append(address.getAddressLine(i)).append(",");
+                    }
+                    String strAdd = strReturnedAddress.toString();
+                    String city = addresses.get(0).getLocality();
+                    String country = addresses.get(0).getCountryName();
+                     knownName = addresses.get(0).getFeatureName();
+                    Log.e("cityName", city);
+                    if (knownName != null) {
+                        knownName = knownName + ", " + city + ", " + country;
+                        String knownNameSmall = knownName + ", " + city;
+                        if (knownName.length() > 33) {
+                            knownName = knownNameSmall;
+                            return knownName.trim();
+
+                        } else {
+
+                            return knownName.trim();
+                        }
+
+                    }
+                    Log.e("knownName", "is empty");
+                    return strAdd;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "Re-locating..";
+            }
+            return null;
+        }
+
+        protected void onPostExecute(String result) {
+            tvLocation.setText(result);
+        }
+
+
+    }
 }
