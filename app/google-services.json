@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "374302116479",
+    "firebase_url": "https://aqiandroid-1511946940528.firebaseio.com",
+    "project_id": "aqiandroid-1511946940528",
+    "storage_bucket": "aqiandroid-1511946940528.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374302116479:android:c0ebb8a9e95e38ae",
+        "android_client_info": {
+          "package_name": "in.purelogic.aqi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "374302116479-l6m08gqoi3rotbp4hcco4fvj0qp74ubr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.purelogic.aqi",
+            "certificate_hash": "f7ef06edee6aab191d68185a16612d8be6db35aa"
+          }
+        },
+        {
+          "client_id": "374302116479-299f4if749ok273n15l08c1bki0hu2u1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzXmuHedOqXidDXzuXS7pf4YCc4jZ_9C0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "374302116479-299f4if749ok273n15l08c1bki0hu2u1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

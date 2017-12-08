@@ -399,8 +399,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             params2.put("key", KEY);
             letsDoSomeNetworkingOutdoor(params2);
         }
-
-
     }
 
     @Override
@@ -504,7 +502,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (knownName != null && city != null) {
                        String knownName2 = knownName ;
                         knownName = knownName + ", " + city;
-
                         if(knownName.length() < 22) {
                             return knownName.trim();
                         }
@@ -522,11 +519,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             return null;
         }
-
         protected void onPostExecute(String result) {
             tvLocation.setText(result);
         }
-
 
     }
 }

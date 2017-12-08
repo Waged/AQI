@@ -3,15 +3,16 @@
     package="in.purelogic.aqi">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
-         xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.example.google.playservices.placecompletefragment"
-        android:versionCode="1"
-        android:versionName="1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.google.playservices.placecompletefragment"
+    android:versionCode="1"
+    android:versionName="1.0"
 
     <application
         android:allowBackup="true"
@@ -20,6 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".SplashScreen"
             android:noHistory="true"
@@ -58,6 +60,17 @@
         <activity android:name=".activities.Blog" />
         <activity android:name=".activities.AboutUs" />
         <activity android:name=".activities.SavedLocations"></activity>
+
+
     </application>
+
+    <service
+        android:name=".notifications.MyFirebaseMessagingService"
+        android:permission="com.google.android.c2dm.permission.SEND">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+        </intent-filter>
+    </service>
 
 </manifest>

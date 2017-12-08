@@ -984,6 +984,10 @@
                 android:layout_height="wrap_content">
 
                 <LinearLayout
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
@@ -1008,8 +1012,8 @@
                             android:src="@drawable/gridnotify"
                             android:background="@null"
                             android:layout_gravity="center"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
@@ -1018,8 +1022,8 @@
                             android:src="@drawable/gridlocation"
                             android:background="@null"
                             android:layout_gravity="center"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
@@ -1029,8 +1033,8 @@
                             android:src="@drawable/gridblog"
                             android:background="@null"
                             android:layout_gravity="center"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
@@ -1038,9 +1042,9 @@
                             android:id="@+id/btnWebsite"
                             android:src="@drawable/gridwebsite"
                             android:background="@null"
-                            android:layout_width="120dp"
+                            android:layout_width="100dp"
                             android:layout_gravity="center"
-                            android:layout_height="120dp"
+                            android:layout_height="100dp"
                             android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
@@ -1050,15 +1054,15 @@
                             android:src="@drawable/gridaboutus"
                             android:background="@null"
                             android:layout_gravity="center"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:scaleType="centerCrop"
                             android:layout_weight="1" />
 
                         <ImageButton
                             android:background="@null"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
                             android:layout_gravity="center"
                             android:scaleType="centerCrop"
                             android:layout_weight="1" />

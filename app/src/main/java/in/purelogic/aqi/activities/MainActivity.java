@@ -43,7 +43,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
@@ -61,16 +60,13 @@ import com.loopj.android.http.RequestParams;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
 import com.yalantis.phoenix.PullToRefreshView;
-
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -83,6 +79,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LocationListener, PlaceSelectionListener {
     public static final String aqi = "aqi";
     public static final String time = "time";
+    boolean isNotify = false;
     public static final String message = "message";
     //  final static String OUR_URL = " https://api.aqi.in/locationData?";
     //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
@@ -312,7 +309,7 @@ public class MainActivity extends AppCompatActivity
         //  entries2.add(new Entry(30, 3));
         //  entries2.add(new Entry(40, 4));
         //  entries2.add(new Entry(80, 5));
-        RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Average AQI-Reading'\'Month");
+        RadarDataSet dataset_comp1 = new RadarDataSet(entries, "Average AQI-Reading'/'Month");
         //  RadarDataSet dataset_comp2 = new RadarDataSet(entries2, "Overall Readings");
         dataset_comp1.setColor(Color.RED);
         dataset_comp1.setDrawFilled(true);
@@ -582,9 +579,19 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.btnNotification)
     void notificationbtn() {
-        Toast.makeText(this, "btnNotification", Toast.LENGTH_SHORT).show();
-    }
 
+        if(!isNotify) {
+            btnNotify.setImageResource(R.drawable.gridnotify);
+            Toast.makeText(this, "Now Notification On", Toast.LENGTH_SHORT).show();
+            isNotify = true;
+        }
+
+    else{
+        btnNotify.setImageResource(R.drawable.gridnotifyoff);
+        Toast.makeText(this, "Now Notification Off", Toast.LENGTH_SHORT).show();
+            isNotify = false;
+    }
+    }
     // @OnClick(R.id.btnWhatAqi)
     //void whatsAQIbtn() {
     //   Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
