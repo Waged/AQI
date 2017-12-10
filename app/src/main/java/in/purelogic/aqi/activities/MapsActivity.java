@@ -148,7 +148,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnMapLongClickListener(MapsActivity.this);
-        db = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME).build();
+        db = Room.databaseBuilder(this, AppDatabase.class, AppDatabase.DB_NAME)
+                .fallbackToDestructiveMigration().build();
 
         if (bundle != null) {
             latitude = bundle.getDouble("latitude");
@@ -293,7 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             protected Boolean doInBackground(Void... params) {
                 DetailLocationDao ldd = db.getDetailLocationDao();
                 List<DetailLocation> locationsList = db.getDetailLocationDao().getAll();
-                String placeName = null;
+                String placeName ;
                 if (locationsList.size() == 0 || locationsList == null) {
                     Log.e("favourites", "location list empty");
                     ldd.insertAll(detailLocation);
@@ -447,9 +448,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateMapsUI(AirVisualModel airVisualModel) {
         if (airVisualModel != null) {
-            tvTemp.setText(airVisualModel.getmTemperature() + "");
-            tvAqi.setText(airVisualModel.getmAQI() + "");
-            tvHumi.setText(airVisualModel.getmHumidity() + "");
+            tvTemp.setText(Integer.toString(airVisualModel.getmTemperature()));
+            tvAqi.setText(Integer.toString(airVisualModel.getmAQI() ));
+            tvHumi.setText(Integer.toString(airVisualModel.getmHumidity()) );
             addMyMarker(mySearchPlace, airVisualModel.getmAQI());
         } else {
             tvLocation.setText("Couldn't Define your Location");
@@ -475,7 +476,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     //TODO: AsyncTask to fetch user location
-    private class FindMe extends AsyncTask<Void, Void, String> {
+    private  class FindMe extends AsyncTask<Void, Void, String> {
         private Context appContext;
         private FindMe(Context appContext) {
             this.appContext = appContext;

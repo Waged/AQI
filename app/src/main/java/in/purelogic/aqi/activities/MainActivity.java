@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity
     final String url = "https://www.facebook.com/aqiindia/";
     final long MIN_TIME = 5000;        // Time between location updates (5000 milliseconds or 5 seconds)
     final float MIN_DISTANCE = 100;  // Distance between location updates (1000m or 1km)
-
     // The entry points to the Places API.
     //private GeoDataClient mGeoDataClient;
     // private PlaceDetectionClient mPlaceDetectionClient;
