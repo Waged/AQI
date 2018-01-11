@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-//import android.content.SharedPreferences;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -47,12 +46,8 @@ import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -80,25 +75,33 @@ public class MainActivity extends AppCompatActivity
     public static final String aqi = "aqi";
     public static final String time = "time";
     boolean isNotify = false;
-    public static final String message = "message";
+    public static final String TAG = MainActivity.class.getSimpleName();
+    //Shared preference declaration for using key Value references
+    SharedPreferences sharedpreferences ;
+    public static final String lastHrsDataPrefs = "lastHrsDataPrefs";
+    public static final String aqiPrefs = "aqiPrefs";
+    public static final String tempPrefs = "tempPrefs";
+    public static final String humidityPrefs = "humidityPrefs";
+    public static final String timePrefsMnth = "timePrefsMnth";
+    public static final String timePrefsDay="timePrefsDay";
+    public static final String timePrefsHr = "timePrefsHr";
     //  final static String OUR_URL = " https://api.aqi.in/locationData?";
     //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
     // final static String KEY = "kbLpQXHgWm7PkczZM";
     // final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
     //  final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
-//"http://api.airvisual.com/v2/nearest_city?lat=35.98&lon=140.33&key={{YOUR_API_KEY}}";
+    //"http://api.airvisual.com/v2/nearest_city?lat=35.98&lon=140.33&key={{YOUR_API_KEY}}";
     final static String AIR_VISUAL_URL = "http://api.airvisual.com/v2/nearest_city?";
     final static String KEY = "kbLpQXHgWm7PkczZM";
     public static boolean gps_enabled = false;
     public static boolean network_enabled = false;
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
-    final long MIN_TIME = 5000;        // Time between location updates (5000 milliseconds or 5 seconds)
-    final float MIN_DISTANCE = 100;  // Distance between location updates (1000m or 1km)
+    final long MIN_TIME = 0;        // Time between location updates (5000 milliseconds or 5 seconds)
+    final float MIN_DISTANCE = 0;  // Distance between location updates (1000m or 1km)
     // The entry points to the Places API.
     //private GeoDataClient mGeoDataClient;
     // private PlaceDetectionClient mPlaceDetectionClient;
-    final int REQUEST_CODE_AUTOCOMPLETE = 22;
     final int REQUEST_CODE = 1;
     public boolean doubleBackToExitPressedOnce = false;
     public boolean isGeoFetchName = false;
@@ -174,13 +177,12 @@ public class MainActivity extends AppCompatActivity
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         } catch (Exception ex) {
-            Log.e("gps", ex.toString());
+            Log.e(TAG, ex.toString());
         }
-
         try {
             network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         } catch (Exception ex) {
-            Log.e("network", ex.toString());
+            Log.e(TAG, ex.toString());
         }
         if (!gps_enabled && !network_enabled) {
 
@@ -204,16 +206,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     //facebook re-directing
+    @NonNull
     public static Intent newFacebookIntent(PackageManager pm, String url) {
         Uri uri = Uri.parse(url);
         try {
             ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
             if (applicationInfo.enabled) {
                 uri = Uri.parse("fb://facewebmodal/f?href=" + url);
-                Log.d("facebookredirecting", "welldone");
+                Log.d(TAG, "welldone");
             }
         } catch (PackageManager.NameNotFoundException ignored) {
-            Log.d("facebookredirecting", "badme");
+            Log.d(TAG, "badme");
         }
         return new Intent(Intent.ACTION_VIEW, uri);
     }
@@ -222,55 +225,53 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         CheckOldAndroidVersion();
-        //  getAqiForCurrentLocation();
-
-        Log.e("onStart", "Called");
+        Log.e(TAG, "Called");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("onResume", "Called");
-
+        //getAqiForCurrentLocation();
+        Log.e(TAG, "Called");
     }
 
     private void CheckOldAndroidVersion() {
         if (android.os.Build.VERSION.SDK_INT <= 22) {
-            Log.e("sdkLess22", " right");
+            Log.e(TAG, " right");
             LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             try {
                 gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                Log.e("gps", "status: " + gps_enabled);
+                Log.e(TAG, "status: " + gps_enabled);
             } catch (Exception ex) {
-                Log.e("gps", ex.toString());
+                Log.e(TAG, ex.toString());
             }
             try {
                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                Log.e("network", "status: " + gps_enabled);
+                Log.e(TAG, "status: " + gps_enabled);
             } catch (Exception ex) {
-                Log.e("network", ex.toString());
+                Log.e(TAG, ex.toString());
             }
             if (!gps_enabled && !network_enabled) {
                 displayPromptForEnablingGPS(this);
             }
         } else {
-            Log.e("sdkGreater22", " right");
+            Log.e(TAG, " right");
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                     PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)
                             != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
-                Log.e("permGrantedInOnresume", "right");
-            } else {
+                Log.e(TAG, "right");
+            }
+            else {
                 displayPromptForEnablingGPS(this);
-                Log.e("permGrantedInOnresume", "right");
+                Log.e(TAG, "right");
             }
         }
     }
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
         return cm.getActiveNetworkInfo() != null;
     }
 
@@ -279,12 +280,12 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        sharedpreferences = getSharedPreferences(lastHrsDataPrefs, Context.MODE_PRIVATE);
         if (!isNetworkConnected()) {
             retry.setVisibility(View.VISIBLE);
-
         } else {
             showMyDialog();
-            isDialog = true;
+            isDialog = true ;
             getAqiForCurrentLocation();
         }
 
@@ -370,7 +371,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDrawerStateChange(int oldState, int newState) {
                 if (newState == ElasticDrawer.STATE_CLOSED) {
-                    Log.i("MainActivity", "Drawer STATE_CLOSED");
+                    Log.i(TAG, "Drawer STATE_CLOSED");
                     //   Toast.makeText(MainActivity.this, "onDrawerStateChange ", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -390,7 +391,7 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         mPullToRefreshView.setRefreshing(false);
                         Toast.makeText(MainActivity.this, "Refreshing..", Toast.LENGTH_SHORT).show();
-                        Log.e("getAqi", "inside swipe to refresh");
+                        Log.e(TAG, "inside swipe to refresh");
                         getAqiForCurrentLocation();
 
 
@@ -400,29 +401,6 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-    }
-
-    private void openAutocompleteActivity() {
-        try {
-            // The autocomplete activity requires Google Play Services to be available. The intent
-            // builder checks this and throws an exception if it is not the case.
-            Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                    .build(this);
-            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
-        } catch (GooglePlayServicesRepairableException e) {
-            // Indicates that Google Play Services is either not installed or not up to date. Prompt
-            // the user to correct the issue.
-            GoogleApiAvailability.getInstance().getErrorDialog(this, e.getConnectionStatusCode(),
-                    0 /* requestCode */).show();
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // Indicates that Google Play Services is not available and the problem is not easily
-            // resolvable.
-            String message = "Google Play Services is not available: " +
-                    GoogleApiAvailability.getInstance().getErrorString(e.errorCode);
-
-            Log.e("search", message);
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -442,12 +420,11 @@ public class MainActivity extends AppCompatActivity
         }, 2000);
     }
 
-    // TODO: Add getAqiForCurrentLocation() here:
+    // TODO: Add getAqi here:
     private void getAqiForCurrentLocation() {
-        Log.e("getAQI", "from Inside getAqiForCurrentLocation Called");
+        Log.e(TAG, "from Inside getAqiForCurrentLocation Called");
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
-
             @Override
             public void onLocationChanged(Location location) {
                 Log.d("onLocationChanged", "called");
@@ -455,7 +432,6 @@ public class MainActivity extends AppCompatActivity
                 longitude = location.getLongitude();
                 String latReq = Double.toString(latitude);
                 String lonReq = Double.toString(longitude);
-
                 Log.e("onLocationChanged", "Latitude =" + latitude + " longitude =" + longitude);
                 if (latitude != 0.0 && longitude != 0.0) {
                     Log.e("location", "location Achieved");
@@ -579,17 +555,15 @@ public class MainActivity extends AppCompatActivity
     @OnClick(R.id.btnNotification)
     void notificationbtn() {
 
-        if(!isNotify) {
+        if (!isNotify) {
             btnNotify.setImageResource(R.drawable.gridnotify);
             Toast.makeText(this, "Now Notification On", Toast.LENGTH_SHORT).show();
             isNotify = true;
-        }
-
-    else{
-        btnNotify.setImageResource(R.drawable.gridnotifyoff);
-        Toast.makeText(this, "Now Notification Off", Toast.LENGTH_SHORT).show();
+        } else {
+            btnNotify.setImageResource(R.drawable.gridnotifyoff);
+            Toast.makeText(this, "Now Notification Off", Toast.LENGTH_SHORT).show();
             isNotify = false;
-    }
+        }
     }
     // @OnClick(R.id.btnWhatAqi)
     //void whatsAQIbtn() {
@@ -681,7 +655,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
-
         if (!isDialog) {
             showMyDialog();
             isDialog = true;
@@ -747,8 +720,14 @@ public class MainActivity extends AppCompatActivity
         String hourString = (String) DateFormat.format("HH", date); // Jun
         String minuteString = (String) DateFormat.format("mm", date);
         tvLastRefresh.setText(hourString + ":" + minuteString + " " + dayOfTheWeek + ", " + monthString + " " + day); // we are
-
-        Log.d("icon", airVisualModel.getmIcon());
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(aqiPrefs, String.valueOf(airVisualModel.getmAQI()));
+        editor.putString(humidityPrefs, String.valueOf(airVisualModel.getmTemperature()));
+        editor.putString(tempPrefs, String.valueOf(airVisualModel.getmTemperature()));
+        editor.putString(timePrefsHr,hourString);
+        editor.putString(timePrefsDay,day);
+        editor.putString(timePrefsMnth,monthString);
+        editor.commit();
         hideMyDialog();
     }
 
@@ -766,7 +745,6 @@ public class MainActivity extends AppCompatActivity
         }
         return R.drawable.ic_dunno;
     }
-
     private
     @DrawableRes
     int setRelevantResWeather(String icon) {
@@ -867,6 +845,7 @@ public class MainActivity extends AppCompatActivity
     //TODO: AsyncTask to fetch user location
     private class FindMe extends AsyncTask<Void, Void, String> {
         private Context appContext;
+
         private FindMe(Context appContext) {
             this.appContext = appContext;
         }

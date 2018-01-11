@@ -1,6 +1,7 @@
 package in.purelogic.aqi.activities;
 
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.arch.persistence.room.Room;
 import android.content.Context;
@@ -284,6 +285,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    @SuppressLint("StaticFieldLeak")
     @OnClick(R.id.ivFav)
     public void addToFavourites() {
 
