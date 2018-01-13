@@ -97,10 +97,10 @@ public class MainActivity extends AppCompatActivity
     public static boolean network_enabled = false;
     // Base URL
     final String url = "https://www.facebook.com/aqiindia/";
-    final long MIN_TIME = 0;        // Time between location updates (5000 milliseconds or 5 seconds)
-    final float MIN_DISTANCE = 0;  // Distance between location updates (1000m or 1km)
+    final long MIN_TIME = 6000;        // Time between location updates (5000 milliseconds or 5 seconds)
+    final float MIN_DISTANCE = 1000;  // Distance between location updates (1000m or 1km)
     // The entry points to the Places API.
-    //private GeoDataClient mGeoDataClient;
+    // private GeoDataClient mGeoDataClient;
     // private PlaceDetectionClient mPlaceDetectionClient;
     final int REQUEST_CODE = 1;
     public boolean doubleBackToExitPressedOnce = false;
@@ -127,8 +127,8 @@ public class MainActivity extends AppCompatActivity
     TextView tvDate;
     @BindView(R.id.tvPlace)
     TextView tvPlace;
-    @BindView(R.id.tvClock)
-    TextView tvClock;
+    //@BindView(R.id.tvClock)
+    //TextView tvClock;
     @BindView(R.id.tvAqi)
     TextView tvAqi;
     @BindView(R.id.tvAqiComment)
@@ -169,116 +169,24 @@ public class MainActivity extends AppCompatActivity
     String NETWORK_LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
     AirVisualModel airVisualModel = null;
 
-    public static void displayPromptForEnablingGPS(final Activity activity) {
-        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
-        final String message = "Do you want open GPS setting?";
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-            Log.e(TAG, ex.toString());
-        }
-        try {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ex) {
-            Log.e(TAG, ex.toString());
-        }
-        if (!gps_enabled && !network_enabled) {
-
-
-            builder.setMessage(message)
-                    .setPositiveButton("OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface d, int id) {
-                                    activity.startActivity(new Intent(action));
-                                    d.dismiss();
-                                }
-                            })
-                    .setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface d, int id) {
-                                    d.cancel();
-                                }
-                            });
-            builder.create().show();
-        }
-    }
-
-    //facebook re-directing
-    @NonNull
-    public static Intent newFacebookIntent(PackageManager pm, String url) {
-        Uri uri = Uri.parse(url);
-        try {
-            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
-            if (applicationInfo.enabled) {
-                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
-                Log.d(TAG, "welldone");
-            }
-        } catch (PackageManager.NameNotFoundException ignored) {
-            Log.d(TAG, "badme");
-        }
-        return new Intent(Intent.ACTION_VIEW, uri);
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
         CheckOldAndroidVersion();
-        Log.e(TAG, "Called");
+        Log.e(TAG, "OnStartCalled");
     }
-
     @Override
     protected void onResume() {
         super.onResume();
-        //getAqiForCurrentLocation();
-        Log.e(TAG, "Called");
-    }
-
-    private void CheckOldAndroidVersion() {
-        if (android.os.Build.VERSION.SDK_INT <= 22) {
-            Log.e(TAG, " right");
-            LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            try {
-                gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                Log.e(TAG, "status: " + gps_enabled);
-            } catch (Exception ex) {
-                Log.e(TAG, ex.toString());
-            }
-            try {
-                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                Log.e(TAG, "status: " + gps_enabled);
-            } catch (Exception ex) {
-                Log.e(TAG, ex.toString());
-            }
-            if (!gps_enabled && !network_enabled) {
-                displayPromptForEnablingGPS(this);
-            }
-        } else {
-            Log.e(TAG, " right");
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                    PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)
-                            != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
-                Log.e(TAG, "right");
-            }
-            else {
-                displayPromptForEnablingGPS(this);
-                Log.e(TAG, "right");
-            }
-        }
-    }
-
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
+        Log.e(TAG, "onResumeCalled");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.e(TAG, "onCreateCalled");
         ButterKnife.bind(this);
         sharedpreferences = getSharedPreferences(lastHrsDataPrefs, Context.MODE_PRIVATE);
         if (!isNetworkConnected()) {
@@ -334,7 +242,7 @@ public class MainActivity extends AppCompatActivity
         chart.invalidate();
         chart.animate();
         //************************************************************
-        //*********************Chart Ended Here***************************************
+        //********************* Chart Ended Here ***************************************
         //************************************************************
         //TODO:Typeface for Texts
         //Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/moodyrock.ttf");
@@ -349,7 +257,7 @@ public class MainActivity extends AppCompatActivity
         mp = MediaPlayer.create(getApplicationContext(), R.raw.btnclick);
         tvPlace.setTypeface(tfRobotoBoldCondensed, Typeface.BOLD);
         tvDate.setTypeface(tfRobotoBlack, Typeface.NORMAL);
-        tvClock.setTypeface(tfRobotoBlack);
+       // tvClock.setTypeface(tfRobotoBlack);
         tvAqi.setTypeface(tfRobotoBoldCondensed);
         tvAqiComment.setTypeface(tfRobotoBlackItalic);
         tvLastRefresh.setTypeface(tfRobotoBlackItalic);
@@ -402,6 +310,48 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
+    private void CheckOldAndroidVersion() {
+        if (android.os.Build.VERSION.SDK_INT <= 22) {
+            Log.e(TAG, " right");
+            LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            try {
+                gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                Log.e(TAG, "status: " + gps_enabled);
+            } catch (Exception ex) {
+                Log.e(TAG, ex.toString());
+            }
+            try {
+                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                Log.e(TAG, "status: " + gps_enabled);
+            } catch (Exception ex) {
+                Log.e(TAG, ex.toString());
+            }
+            if (!gps_enabled && !network_enabled) {
+                displayPromptForEnablingGPS(this);
+            }
+        } else {
+            Log.e(TAG, " right");
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                    PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
+                Log.e(TAG, "right");
+            }
+            else {
+                displayPromptForEnablingGPS(this);
+                Log.e(TAG, "right");
+            }
+        }
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+
 
     @Override
     public void onBackPressed() {
@@ -573,7 +523,7 @@ public class MainActivity extends AppCompatActivity
     @OnClick(R.id.ibRetry)
     void retry() {
         Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
-        CheckOldAndroidVersion();
+        //CheckOldAndroidVersion();
         getAqiForCurrentLocation();
     }
 
@@ -698,7 +648,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void hideMyDialog() {
-        dialog.hide();
+        dialog.dismiss();
         isDialog = false;
     }
 
@@ -908,6 +858,59 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
+    public static void displayPromptForEnablingGPS(final Activity activity) {
+        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        final String action = Settings.ACTION_LOCATION_SOURCE_SETTINGS;
+        final String message = "Do you want open GPS setting?";
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            Log.e(TAG, ex.toString());
+        }
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+            Log.e(TAG, ex.toString());
+        }
+        if (!gps_enabled && !network_enabled) {
+
+
+            builder.setMessage(message)
+                    .setPositiveButton("OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface d, int id) {
+                                    activity.startActivity(new Intent(action));
+                                    d.dismiss();
+                                }
+                            })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface d, int id) {
+                                    d.cancel();
+                                }
+                            });
+            builder.create().show();
+        }
+    }
+
+    //facebook re-directing
+    @NonNull
+    public static Intent newFacebookIntent(PackageManager pm, String url) {
+        Uri uri = Uri.parse(url);
+        try {
+            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.facebook.katana", 0);
+            if (applicationInfo.enabled) {
+                uri = Uri.parse("fb://facewebmodal/f?href=" + url);
+                Log.d(TAG, "welldone");
+            }
+        } catch (PackageManager.NameNotFoundException ignored) {
+            Log.d(TAG, "badme");
+        }
+        return new Intent(Intent.ACTION_VIEW, uri);
+    }
+
 
 
 }

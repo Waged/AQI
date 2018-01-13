@@ -37,8 +37,8 @@ public interface DetailLocationDao {
     DetailLocation findByPlaceName(String name);
 
 
-   // @Query("UPDATE placerecord SET Column1 = someValue WHERE columnId = :placeRecord.getLocationName()")
-  //  void updateOne(PlaceRecord placeRecord);
+    //@Query("UPDATE app_db WHERE columnId = :placeRecord.getLocationName()")
+    // void updateOne(PlaceRecord placeRecord);
 
 
 }

@@ -88,9 +88,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng mySearchPlace;
     PlaceAutocompleteFragment autocompleteFragment;
     LatLng myPlace;
-    String placeName1 ="" ;
-    double placeSelectedLat ;
-    double placeSelectedLng ;
     double latitude;
     double longitude;
     String location = "NA";
@@ -123,6 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
         bundle = getIntent().getExtras();
+        detailLocation = new DetailLocation();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -153,39 +151,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .fallbackToDestructiveMigration().build();
 
         if (bundle != null) {
-            latitude = bundle.getDouble("latitude");
-            longitude = bundle.getDouble("longitude");
-            LatLng latLng = new LatLng(latitude,longitude);
-            myPlace = new LatLng(latitude, longitude);
-            location = bundle.getString("location");
-            aqi = bundle.getInt("aqi");
-            humidity = bundle.getInt("humidity");
-            temprature = bundle.getInt("temperature");
-            knownName = bundle.getString("knownname");
-            searchedCity = bundle.getString("searchedtext");
-            detailLocation = new DetailLocation();
-            detailLocation.setLocationName(location);
-            detailLocation.setAqiLevel(aqi);
-            detailLocation.setHumidity(humidity);
-            detailLocation.setTemprature(temprature);
-            double dLat = latLng.latitude;
-            String lat = Double.toString(dLat);
-            double dLng = latLng.latitude;
-            String lng = Double.toString(dLng);
-            detailLocation.setLat(lat);
-            detailLocation.setLng(lng);
-            tvLocation.setText(location);
-            tvHumi.setText(Integer.toString(humidity));
-            tvTemp.setText(Integer.toString(temprature));
-            tvAqi.setText(Integer.toString(aqi));
-            addMyMarker(myPlace, aqi);
-
+            try {
+                latitude = bundle.getDouble("latitude");
+                longitude = bundle.getDouble("longitude");
+                LatLng latLng = new LatLng(latitude, longitude);
+                myPlace = new LatLng(latitude, longitude);
+                location = bundle.getString("location");
+                aqi = bundle.getInt("aqi");
+                humidity = bundle.getInt("humidity");
+                temprature = bundle.getInt("temperature");
+                knownName = bundle.getString("knownname");
+                searchedCity = bundle.getString("searchedtext");
+                detailLocation.setLocationName(location);
+                detailLocation.setAqiLevel(aqi);
+                detailLocation.setHumidity(humidity);
+                detailLocation.setTemprature(temprature);
+                double dLat = latLng.latitude;
+                String lat = Double.toString(dLat);
+                double dLng = latLng.latitude;
+                String lng = Double.toString(dLng);
+                detailLocation.setLat(lat);
+                detailLocation.setLng(lng);
+                tvLocation.setText(location);
+                tvHumi.setText(Integer.toString(humidity));
+                tvTemp.setText(Integer.toString(temprature));
+                tvAqi.setText(Integer.toString(aqi));
+                addMyMarker(myPlace, aqi);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
-            //delhi in map
+            //Delhi in map
             LatLng delhiPlace = new LatLng(28.7041, 77.1025);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(delhiPlace));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(8));
-            tvLocation.setText("NA");
+            tvLocation.setText("");
             Toasty.error(this, "GPS or Connection problem !", Toast.LENGTH_SHORT).show();
             //Toast.makeText(this, "No place Provided check GPS", Toast.LENGTH_SHORT).show();
         }
@@ -288,15 +288,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @SuppressLint("StaticFieldLeak")
     @OnClick(R.id.ivFav)
     public void addToFavourites() {
-
         new AsyncTask<Void, Void, Boolean>() {
             Animation fade = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_right);
-
             @Override
             protected Boolean doInBackground(Void... params) {
                 DetailLocationDao ldd = db.getDetailLocationDao();
                 List<DetailLocation> locationsList = db.getDetailLocationDao().getAll();
-                String placeName ;
+                String placeName;
                 if (locationsList.size() == 0 || locationsList == null) {
                     Log.e("favourites", "location list empty");
                     ldd.insertAll(detailLocation);
@@ -304,8 +302,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 } else {
                     for (int i = 0; i < locationsList.size(); i++) {
                         placeName = locationsList.get(i).getLocationName();
-                        if (placeName.contains(knownName) ) {
+                        if (placeName.contains(knownName)) {
                             Log.e("favourites", "placeName contains in the list ");
+                            ldd.updateAll(detailLocation);
                             return false;
                         }
                     }
@@ -333,7 +332,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         }.execute();
-
     }
 
     @Override
@@ -341,7 +339,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Toast.makeText(this, "Long Pressed", Toast.LENGTH_SHORT).show();
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        String label ;
+        String label;
         //reference to the marker
         if (m != null) { //if marker exists (not null or whatever)
             try {
@@ -376,8 +374,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         }
-
-
     }
 
     @Override
@@ -388,9 +384,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(this, "Refreshing place: " + place.getName().toString(), Toast.LENGTH_SHORT).show();
         knownName = place.getName().toString();
         mySearchPlace = place.getLatLng();
-         placeSelectedLat = mySearchPlace.latitude;
-         placeSelectedLng = mySearchPlace.longitude;
-        new FindMe(MapsActivity.this).execute();
+        double placeSelectedLat = mySearchPlace.latitude;
+        double placeSelectedLng = mySearchPlace.longitude;
+        new FindMe(MapsActivity.this, placeSelectedLat, placeSelectedLng).execute();
         String latReq = Double.toString(placeSelectedLat);
         String lonReq = Double.toString(placeSelectedLng);
         Log.e("search", "Lat= " + placeSelectedLng + ",Lng= " + placeSelectedLng);
@@ -434,7 +430,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 detailLocation.setHumidity(airVisualModel.getmHumidity());
                 detailLocation.setLocationName(knownName);
                 updateMapsUI(airVisualModel);
-
             }
 
             @Override
@@ -451,8 +446,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void updateMapsUI(AirVisualModel airVisualModel) {
         if (airVisualModel != null) {
             tvTemp.setText(Integer.toString(airVisualModel.getmTemperature()));
-            tvAqi.setText(Integer.toString(airVisualModel.getmAQI() ));
-            tvHumi.setText(Integer.toString(airVisualModel.getmHumidity()) );
+            tvAqi.setText(Integer.toString(airVisualModel.getmAQI()));
+            tvHumi.setText(Integer.toString(airVisualModel.getmHumidity()));
             addMyMarker(mySearchPlace, airVisualModel.getmAQI());
         } else {
             tvLocation.setText("Couldn't Define your Location");
@@ -461,7 +456,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             tvTemp.setText("NA");
         }
     }
-
 
     private void showMyDialog() {
         dialog = new ProgressDialog(this);
@@ -478,10 +472,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     //TODO: AsyncTask to fetch user location
-    private  class FindMe extends AsyncTask<Void, Void, String> {
+    private class FindMe extends AsyncTask<Void, Void, String> {
         private Context appContext;
-        private FindMe(Context appContext) {
+        double placeSelectedLat, placeSelectedLng;
+
+        private FindMe(Context appContext, double placeSelectedLat, double placeSelectedLng) {
             this.appContext = appContext;
+            this.placeSelectedLat = placeSelectedLat;
+            this.placeSelectedLng = placeSelectedLng;
         }
 
         @Override
@@ -501,16 +499,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     String strAdd = strReturnedAddress.toString();
                     String city = addresses.get(0).getLocality();
-                     knownName = addresses.get(0).getFeatureName();
+                    knownName = addresses.get(0).getFeatureName();
                     if (knownName != null && city != null) {
-                       String knownName2 = knownName ;
+                        String knownName2 = knownName;
                         knownName = knownName + ", " + city;
-                        if(knownName.length() < 22) {
+                        if (knownName.length() < 22) {
                             return knownName.trim();
-                        }
-                        else{
-                            knownName = knownName2 ;
-                            return  knownName ;
+                        } else {
+                            knownName = knownName2;
+                            return knownName;
                         }
                     }
                     Log.e("knownName", "is empty");
@@ -522,6 +519,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             return null;
         }
+
         protected void onPostExecute(String result) {
             tvLocation.setText(result);
         }

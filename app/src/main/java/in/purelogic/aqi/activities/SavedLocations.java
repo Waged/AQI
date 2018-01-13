@@ -65,7 +65,9 @@ public class SavedLocations extends AppCompatActivity {
         btnAddNewFav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(SavedLocations.this, "We will redirect to Maps !", Toast.LENGTH_SHORT).show();
+               // Toast.makeText(SavedLocations.this, "We will redirect to Maps !", Toast.LENGTH_SHORT).show();
+                Intent mapsActivity = new Intent(SavedLocations.this,MapsActivity.class);
+                startActivity(mapsActivity);
             }
         });
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());

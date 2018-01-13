@@ -38,8 +38,6 @@ public class DetailLocation {
     @ColumnInfo(name = "lng")
     private String  lng;
 
-
-
     public int getId() {
         return id;
     }
@@ -68,7 +66,6 @@ public class DetailLocation {
         return lng;
     }
 
-
     public void setId(int id) {
         this.id = id;
     }
@@ -96,4 +93,5 @@ public class DetailLocation {
     public void setLng(String lng) {
         this.lng = lng;
     }
+
 }

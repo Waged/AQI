@@ -17,7 +17,6 @@ public class AirVisualModel {
     private String mIcon;
     private int mAQI;
 
-
     public static AirVisualModel fromJson(JSONObject jsonObject) {
         AirVisualModel airVisualModel = new AirVisualModel();
         try {
