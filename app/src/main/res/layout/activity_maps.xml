@@ -13,15 +13,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="in.purelogic.aqi.activities.MapsActivity" />
+
     <android.support.v7.widget.CardView
         android:id="@+id/map_card_view"
         cardBackgroundColor="#60b0c8db"
         cardCornerRadius="2dp"
-        android:clickable="true"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="165dp"
         android:layout_gravity="bottom"
         android:alpha=".8"
+        android:clickable="true"
         android:elevation="6dp"
         app:cardElevation="4dp">
 
@@ -40,16 +41,14 @@
                 android:id="@+id/map_tvMyLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
-                android:maxLines="1"
                 android:layout_alignBottom="@+id/imageView2"
                 android:layout_toEndOf="@+id/imageView2"
                 android:layout_toRightOf="@+id/imageView2"
+                android:maxLines="1"
                 android:text="Your Location" />
 
             <ImageButton
                 android:id="@+id/ivFav"
-                android:clickable="true"
-                android:background="@null"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_alignParentEnd="true"
@@ -58,6 +57,8 @@
                 android:layout_marginEnd="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_marginTop="4dp"
+                android:background="@null"
+                android:clickable="true"
                 android:src="@drawable/ic_notinfavorites" />
 
             <ImageView
@@ -106,6 +107,7 @@
                 android:layout_toEndOf="@+id/ivHumidrature"
                 android:layout_toRightOf="@+id/ivHumidrature"
                 android:text="NA" />
+
             <TextView
                 android:id="@+id/tvStaticTemp"
                 android:layout_width="wrap_content"
@@ -120,55 +122,52 @@
                 android:id="@+id/ivHumid"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:src="@drawable/ic_humid"
                 android:layout_alignBottom="@+id/map_tvTemp"
                 android:layout_toLeftOf="@+id/map_tvHumid"
-                android:layout_toStartOf="@+id/map_tvHumid" />
-
-
+                android:layout_toStartOf="@+id/map_tvHumid"
+                android:src="@drawable/ic_humid" />
 
 
             <TextView
                 android:id="@+id/map_tvHumid"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="NA"
                 android:layout_alignBottom="@+id/ivHumid"
                 android:layout_toLeftOf="@+id/ivFav"
-                android:layout_toStartOf="@+id/ivFav" />
-
+                android:layout_toStartOf="@+id/ivFav"
+                android:text="NA" />
 
 
             <TextView
                 android:id="@+id/tvStaticHumi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Humi"
-                android:layout_alignTop="@+id/ivHumid"
                 android:layout_alignLeft="@+id/map_tvHumid"
-                android:layout_alignStart="@+id/map_tvHumid" />
+                android:layout_alignStart="@+id/map_tvHumid"
+                android:layout_alignTop="@+id/ivHumid"
+                android:text="Humi" />
 
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 
-<!--
-    <com.arlib.floatingsearchview.FloatingSearchView
-        android:layout_marginTop="25dp"
-        android:id="@+id/floating_search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:floatingSearch_leftActionMode="showSearch"
-        app:floatingSearch_searchHint="Search..."
-        app:floatingSearch_suggestionsListAnimDuration="250"
-        app:floatingSearch_showSearchKey="false"
-        />
--->
+    <!--
+        <com.arlib.floatingsearchview.FloatingSearchView
+            android:layout_marginTop="25dp"
+            android:id="@+id/floating_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:floatingSearch_leftActionMode="showSearch"
+            app:floatingSearch_searchHint="Search..."
+            app:floatingSearch_suggestionsListAnimDuration="250"
+            app:floatingSearch_showSearchKey="false"
+            />
+    -->
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="50dp">
 
         <fragment
             android:id="@+id/autocomplete_fragment"

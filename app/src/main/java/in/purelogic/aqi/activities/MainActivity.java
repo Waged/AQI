@@ -42,12 +42,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.github.mikephil.charting.charts.RadarChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -55,13 +57,16 @@ import com.loopj.android.http.RequestParams;
 import com.mxn.soul.flowingdrawer_core.ElasticDrawer;
 import com.mxn.soul.flowingdrawer_core.FlowingDrawer;
 import com.yalantis.phoenix.PullToRefreshView;
+
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -70,26 +75,29 @@ import es.dmoral.toasty.Toasty;
 import in.purelogic.aqi.Models.AirVisualModel;
 import in.purelogic.aqi.R;
 
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, LocationListener, PlaceSelectionListener {
+    //NavigationView.OnNavigationItemSelectedListener,
     public static final String aqi = "aqi";
     public static final String time = "time";
     boolean isNotify = false;
     public static final String TAG = MainActivity.class.getSimpleName();
+    PlaceAutocompleteFragment autocompleteFragmentMain;
     //Shared preference declaration for using key Value references
-    SharedPreferences sharedpreferences ;
+    SharedPreferences sharedpreferences;
     public static final String lastHrsDataPrefs = "lastHrsDataPrefs";
     public static final String aqiPrefs = "aqiPrefs";
     public static final String tempPrefs = "tempPrefs";
     public static final String humidityPrefs = "humidityPrefs";
     public static final String timePrefsMnth = "timePrefsMnth";
-    public static final String timePrefsDay="timePrefsDay";
+    public static final String timePrefsDay = "timePrefsDay";
     public static final String timePrefsHr = "timePrefsHr";
-    //  final static String OUR_URL = " https://api.aqi.in/locationData?";
-    //final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
+    // final static String OUR_URL = " https://api.aqi.in/locationData?";
+    // final static String SENSOR_OUTDOOR_URL = "http://api.airvisual.com/v2/nearest_city?";
     // final static String KEY = "kbLpQXHgWm7PkczZM";
     // final static String SENSOR_OUTDOOR_URL = "http://api.airpollutionapi.com/1.0/aqi?";
-    //  final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
+    // final static String APPID = "sm3u7f6d6rckdv6l5q3concsbb";
     //"http://api.airvisual.com/v2/nearest_city?lat=35.98&lon=140.33&key={{YOUR_API_KEY}}";
     final static String AIR_VISUAL_URL = "http://api.airvisual.com/v2/nearest_city?";
     final static String KEY = "kbLpQXHgWm7PkczZM";
@@ -127,8 +135,6 @@ public class MainActivity extends AppCompatActivity
     TextView tvDate;
     @BindView(R.id.tvPlace)
     TextView tvPlace;
-    //@BindView(R.id.tvClock)
-    //TextView tvClock;
     @BindView(R.id.tvAqi)
     TextView tvAqi;
     @BindView(R.id.tvAqiComment)
@@ -176,6 +182,7 @@ public class MainActivity extends AppCompatActivity
         CheckOldAndroidVersion();
         Log.e(TAG, "OnStartCalled");
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -188,22 +195,21 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Log.e(TAG, "onCreateCalled");
         ButterKnife.bind(this);
+//        autocompleteFragmentMain = (PlaceAutocompleteFragment)
+//                getFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+//        autocompleteFragmentMain.setOnPlaceSelectedListener(MainActivity.this);
         sharedpreferences = getSharedPreferences(lastHrsDataPrefs, Context.MODE_PRIVATE);
         if (!isNetworkConnected()) {
             retry.setVisibility(View.VISIBLE);
         } else {
             showMyDialog();
-            isDialog = true ;
+            isDialog = true;
             getAqiForCurrentLocation();
         }
-
-
         //openAutocompleteActivity();
 
-        //ToDo: for the sake of the Radar
-        //******************************************
-        //************************************************************
-        //************************************************************
+        //ToDo: for the sake of the RadarChart
+
         ArrayList<Entry> entries = new ArrayList<>();
         entries.add(new Entry(140, 0));
         entries.add(new Entry(250, 1));
@@ -257,7 +263,7 @@ public class MainActivity extends AppCompatActivity
         mp = MediaPlayer.create(getApplicationContext(), R.raw.btnclick);
         tvPlace.setTypeface(tfRobotoBoldCondensed, Typeface.BOLD);
         tvDate.setTypeface(tfRobotoBlack, Typeface.NORMAL);
-       // tvClock.setTypeface(tfRobotoBlack);
+        // tvClock.setTypeface(tfRobotoBlack);
         tvAqi.setTypeface(tfRobotoBoldCondensed);
         tvAqiComment.setTypeface(tfRobotoBlackItalic);
         tvLastRefresh.setTypeface(tfRobotoBlackItalic);
@@ -274,22 +280,22 @@ public class MainActivity extends AppCompatActivity
         locationCard.setCardElevation(4.0f);
 
         //Todo: Elastic Drawer to view Settings
-        mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
-        mDrawer.setOnDrawerStateChangeListener(new ElasticDrawer.OnDrawerStateChangeListener() {
-            @Override
-            public void onDrawerStateChange(int oldState, int newState) {
-                if (newState == ElasticDrawer.STATE_CLOSED) {
-                    Log.i(TAG, "Drawer STATE_CLOSED");
-                    //   Toast.makeText(MainActivity.this, "onDrawerStateChange ", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onDrawerSlide(float openRatio, int offsetPixels) {
-                // Log.i("MainActivity", "openRatio=" + openRatio + " ,offsetPixels=" + offsetPixels);
-                //  Toast.makeText(MainActivity.this, "onDrawerSlide ", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        mDrawer.setTouchMode(ElasticDrawer.TOUCH_MODE_BEZEL);
+//        mDrawer.setOnDrawerStateChangeListener(new ElasticDrawer.OnDrawerStateChangeListener() {
+//            @Override
+//            public void onDrawerStateChange(int oldState, int newState) {
+//                if (newState == ElasticDrawer.STATE_CLOSED) {
+//                    Log.i(TAG, "Drawer STATE_CLOSED");
+//                    //   Toast.makeText(MainActivity.this, "onDrawerStateChange ", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onDrawerSlide(float openRatio, int offsetPixels) {
+//                // Log.i("MainActivity", "openRatio=" + openRatio + " ,offsetPixels=" + offsetPixels);
+//                //  Toast.makeText(MainActivity.this, "onDrawerSlide ", Toast.LENGTH_SHORT).show();
+//            }
+//        });
         //Todo: Pull to refresh view
         mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
             @Override
@@ -307,7 +313,6 @@ public class MainActivity extends AppCompatActivity
                 }, 900);
             }
         });
-
 
     }
 
@@ -334,12 +339,11 @@ public class MainActivity extends AppCompatActivity
             Log.e(TAG, " right");
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                     PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                             != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
                 Log.e(TAG, "right");
-            }
-            else {
+            } else {
                 displayPromptForEnablingGPS(this);
                 Log.e(TAG, "right");
             }
@@ -350,8 +354,6 @@ public class MainActivity extends AppCompatActivity
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
     }
-
-
 
     @Override
     public void onBackPressed() {
@@ -498,7 +500,7 @@ public class MainActivity extends AppCompatActivity
         mp.start();
         //btnLocation.startAnimation(fade);
         Intent loc = new Intent(MainActivity.this, SavedLocations.class);
-        mDrawer.closeMenu();
+//        mDrawer.closeMenu();
         startActivity(loc);
     }
 
@@ -506,19 +508,19 @@ public class MainActivity extends AppCompatActivity
     void notificationbtn() {
 
         if (!isNotify) {
-            btnNotify.setImageResource(R.drawable.gridnotify);
+//            btnNotify.setImageResource(R.drawable.gridnotify);
             Toast.makeText(this, "Now Notification On", Toast.LENGTH_SHORT).show();
             isNotify = true;
         } else {
-            btnNotify.setImageResource(R.drawable.gridnotifyoff);
+//            btnNotify.setImageResource(R.drawable.gridnotifyoff);
             Toast.makeText(this, "Now Notification Off", Toast.LENGTH_SHORT).show();
             isNotify = false;
         }
     }
-    // @OnClick(R.id.btnWhatAqi)
-    //void whatsAQIbtn() {
-    //   Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
-    //}
+//     @OnClick(R.id.btnWhatAqi)
+//    void whatsAQIbtn() {
+//       Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
+//    }
 
     @OnClick(R.id.ibRetry)
     void retry() {
@@ -604,13 +606,14 @@ public class MainActivity extends AppCompatActivity
         startActivity(mapIntent);
     }
 
-    private void letsDoSomeNetworkingOutdoor(RequestParams requestParams) {
+    private void letsDoSomeNetworkingOutdoor(final RequestParams requestParams) {
         if (!isDialog) {
             showMyDialog();
             isDialog = true;
         }
         AsyncHttpClient client = new AsyncHttpClient();
         client.get(AIR_VISUAL_URL, requestParams, new JsonHttpResponseHandler() {
+
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
@@ -619,6 +622,7 @@ public class MainActivity extends AppCompatActivity
                 hideMyDialog();
                 if (response != null) {
                     Log.d("response", response.toString());
+                    Log.d("outdoorapi:", AIR_VISUAL_URL+requestParams);
                     airVisualModel = AirVisualModel.fromJson(response);
                     updateUI(airVisualModel);
                 }
@@ -674,9 +678,9 @@ public class MainActivity extends AppCompatActivity
         editor.putString(aqiPrefs, String.valueOf(airVisualModel.getmAQI()));
         editor.putString(humidityPrefs, String.valueOf(airVisualModel.getmTemperature()));
         editor.putString(tempPrefs, String.valueOf(airVisualModel.getmTemperature()));
-        editor.putString(timePrefsHr,hourString);
-        editor.putString(timePrefsDay,day);
-        editor.putString(timePrefsMnth,monthString);
+        editor.putString(timePrefsHr, hourString);
+        editor.putString(timePrefsDay, day);
+        editor.putString(timePrefsMnth, monthString);
         editor.commit();
         hideMyDialog();
     }
@@ -695,6 +699,7 @@ public class MainActivity extends AppCompatActivity
         }
         return R.drawable.ic_dunno;
     }
+
     private
     @DrawableRes
     int setRelevantResWeather(String icon) {
@@ -785,12 +790,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //For Menu to Override method
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(@Nullable MenuItem item) {
-        return true;
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        return false;
     }
+
 
     //TODO: AsyncTask to fetch user location
     private class FindMe extends AsyncTask<Void, Void, String> {
@@ -910,7 +914,6 @@ public class MainActivity extends AppCompatActivity
         }
         return new Intent(Intent.ACTION_VIEW, uri);
     }
-
 
 
 }

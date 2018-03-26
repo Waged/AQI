@@ -37,7 +37,6 @@
 
 <Button
     android:id="@+id/btnAddNewFav"
-    android:onClick="AddNewFavPlace"
     android:drawableRight="@android:drawable/ic_menu_add"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -46,8 +45,6 @@
     android:layout_marginTop="4dp"
     android:text="Add New Place "
     android:background="@color/colorTextPrimaryGood"/>
-
-
         <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"

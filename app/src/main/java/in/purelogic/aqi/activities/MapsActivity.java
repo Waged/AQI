@@ -290,6 +290,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void addToFavourites() {
         new AsyncTask<Void, Void, Boolean>() {
             Animation fade = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_right);
+
             @Override
             protected Boolean doInBackground(Void... params) {
                 DetailLocationDao ldd = db.getDetailLocationDao();

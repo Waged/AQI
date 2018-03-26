@@ -85,8 +85,6 @@ public class Blog extends AppCompatActivity {
             } else {
                 htmlWebView.loadUrl(wordPress);
             }
-
-
         } else {
             avi.hide();
             imageView.setVisibility(View.VISIBLE);

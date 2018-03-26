@@ -38,12 +38,6 @@ public class AirVisualModel {
 
 
 
-
-
-
-
-
-
     public int getmTemperature() {
         return mTemperature;
     }
