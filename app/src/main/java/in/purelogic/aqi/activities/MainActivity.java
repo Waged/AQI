@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity
         Log.e(TAG, "onCreateCalled");
         ButterKnife.bind(this);
 //        autocompleteFragmentMain = (PlaceAutocompleteFragment)
-//                getFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+//        getFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 //        autocompleteFragmentMain.setOnPlaceSelectedListener(MainActivity.this);
         sharedpreferences = getSharedPreferences(lastHrsDataPrefs, Context.MODE_PRIVATE);
         if (!isNetworkConnected()) {
@@ -517,10 +517,6 @@ public class MainActivity extends AppCompatActivity
             isNotify = false;
         }
     }
-//     @OnClick(R.id.btnWhatAqi)
-//    void whatsAQIbtn() {
-//       Toast.makeText(this, "What's AQI ?", Toast.LENGTH_SHORT).show();
-//    }
 
     @OnClick(R.id.ibRetry)
     void retry() {
@@ -528,7 +524,6 @@ public class MainActivity extends AppCompatActivity
         //CheckOldAndroidVersion();
         getAqiForCurrentLocation();
     }
-
 
     @OnClick(R.id.btnBlog)
     void blogBtn() {

@@ -36,11 +36,9 @@ public class FavLocationAdapter extends RecyclerView.Adapter<FavLocationAdapter.
     Context context;
     AppDatabase db ;
 
-
     // Provide a suitable constructor (depends on the kind of dataset)
     public FavLocationAdapter(List<DetailLocation> detailLocationList) {
         this.detailLocationList = detailLocationList;
-
 
     }
 

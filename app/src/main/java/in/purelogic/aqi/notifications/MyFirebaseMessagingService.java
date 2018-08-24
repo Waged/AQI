@@ -21,12 +21,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setContentTitle(remoteMessage.getData()
                 .get("title"))
                 .setContentText(remoteMessage.getData().get("message"))
-                .setAutoCancel(true) //dismisses the notification on click
+                .setAutoCancel(true)         //dismisses the notification on click
                 .setSound(defaultSoundUri);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(notificationId /* ID of notification */, notificationBuilder.build());
     }
-
-
-
 }

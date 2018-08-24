@@ -63,6 +63,7 @@
         <activity android:name=".activities.Blog" />
         <activity android:name=".activities.AboutUs" />
         <activity android:name=".activities.SavedLocations"></activity>
+
         <service
             android:name=".notifications.MyFirebaseMessagingService"
             android:permission="com.google.android.c2dm.permission.SEND">

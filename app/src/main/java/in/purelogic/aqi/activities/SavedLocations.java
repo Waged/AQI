@@ -96,7 +96,6 @@ public class SavedLocations extends AppCompatActivity {
                 }
             }
         }.execute();
-
     }
 
 }
